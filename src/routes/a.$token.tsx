@@ -268,6 +268,7 @@ function Portal() {
 }
 
 function Centered({ children }: { children: React.ReactNode }) {
+
   return (
     <main className="flex min-h-screen items-center justify-center px-6 text-center text-sm text-muted-foreground">
       <div>{children}</div>
