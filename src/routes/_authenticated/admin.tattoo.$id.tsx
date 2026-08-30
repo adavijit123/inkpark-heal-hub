@@ -7,6 +7,7 @@ import { AdminShell } from "@/components/AdminShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
@@ -58,7 +59,7 @@ function TattooDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("healing_photos")
-        .select("id, day_marker, storage_path, created_at")
+        .select("id, day_marker, storage_path, created_at, note, ai_feedback, artist_feedback")
         .eq("tattoo_id", id)
         .order("day_marker");
       if (error) throw error;
@@ -71,6 +72,7 @@ function TattooDetail() {
       return signed;
     },
   });
+
 
   const messages = useQuery({
     queryKey: ["support", id],
@@ -195,22 +197,38 @@ function TattooDetail() {
           </section>
 
           <section className="ink-card p-5">
-            <p className="ink-label">Healing photos</p>
+            <p className="ink-label">Healing photos &amp; feedback</p>
             {(healing.data ?? []).length === 0 ? (
               <p className="mt-2 text-sm text-muted-foreground">Client hasn't uploaded any yet.</p>
             ) : (
-              <div className="mt-3 grid grid-cols-3 gap-2">
+              <ul className="mt-3 space-y-5">
                 {(healing.data ?? []).map((p) => (
-                  <figure key={p.id}>
-                    {p.url ? (
-                      <img src={p.url} alt={`Healing photo day ${p.day_marker}`} className="aspect-square w-full rounded-md object-cover" />
-                    ) : null}
-                    <figcaption className="ink-label mt-1">Day {p.day_marker}</figcaption>
-                  </figure>
+                  <li key={p.id} className="space-y-3 border-t border-border pt-4 first:border-0 first:pt-0">
+                    <div className="flex gap-3">
+                      {p.url ? (
+                        <img
+                          src={p.url}
+                          alt={`Healing photo day ${p.day_marker}`}
+                          className="h-24 w-24 shrink-0 rounded-md object-cover"
+                        />
+                      ) : null}
+                      <div className="min-w-0">
+                        <p className="text-sm text-foreground">Day {p.day_marker}</p>
+                        {p.note ? <p className="mt-1 text-sm text-muted-foreground">“{p.note}”</p> : null}
+                        {p.ai_feedback ? (
+                          <p className="mt-2 whitespace-pre-line text-xs text-muted-foreground">
+                            AI: {p.ai_feedback}
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+                    <ArtistReply id={p.id} initial={p.artist_feedback} onSaved={() => qc.invalidateQueries({ queryKey: ["healing", id] })} />
+                  </li>
                 ))}
-              </div>
+              </ul>
             )}
           </section>
+
 
           <section className="ink-card p-5">
             <p className="ink-label">Reminders</p>
@@ -301,6 +319,53 @@ function EditableField({
           toast.success("Updated");
         }}
       />
+    </div>
+  );
+}
+
+function ArtistReply({
+  id,
+  initial,
+  onSaved,
+}: {
+  id: string;
+  initial: string | null;
+  onSaved: () => void;
+}) {
+  const [text, setText] = useState(initial ?? "");
+  const [saving, setSaving] = useState(false);
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={`reply-${id}`} className="ink-label">
+        Artist feedback to client
+      </Label>
+      <Textarea
+        id={`reply-${id}`}
+        rows={3}
+        value={text}
+        placeholder="Looking clean at this stage — keep it light on the balm."
+        onChange={(e) => setText(e.target.value)}
+      />
+      <Button
+        size="sm"
+        disabled={saving}
+        onClick={async () => {
+          setSaving(true);
+          const { error } = await supabase
+            .from("healing_photos")
+            .update({ artist_feedback: text.trim() || null, artist_feedback_at: new Date().toISOString() })
+            .eq("id", id);
+          setSaving(false);
+          if (error) toast.error(error.message);
+          else {
+            toast.success("Feedback sent to the client page");
+            onSaved();
+          }
+        }}
+      >
+        {saving ? "Saving…" : "Save feedback"}
+      </Button>
     </div>
   );
 }

@@ -127,6 +127,10 @@ export type Database = {
       }
       healing_photos: {
         Row: {
+          ai_feedback: string | null
+          ai_status: string
+          artist_feedback: string | null
+          artist_feedback_at: string | null
           created_at: string
           day_marker: number
           id: string
@@ -135,6 +139,10 @@ export type Database = {
           tattoo_id: string
         }
         Insert: {
+          ai_feedback?: string | null
+          ai_status?: string
+          artist_feedback?: string | null
+          artist_feedback_at?: string | null
           created_at?: string
           day_marker: number
           id?: string
@@ -143,6 +151,10 @@ export type Database = {
           tattoo_id: string
         }
         Update: {
+          ai_feedback?: string | null
+          ai_status?: string
+          artist_feedback?: string | null
+          artist_feedback_at?: string | null
           created_at?: string
           day_marker?: number
           id?: string

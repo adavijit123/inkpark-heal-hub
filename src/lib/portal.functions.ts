@@ -60,3 +60,13 @@ export const markPortalStep = createServerFn({ method: "POST" })
     const { markPortalAction } = await import("./portal.server");
     return markPortalAction(data.token, data.action);
   });
+
+export const requestPhotoAiFeedback = createServerFn({ method: "POST" })
+  .inputValidator((d: { token: string; photoId: string }) => ({
+    token: String(d.token ?? ""),
+    photoId: String(d.photoId ?? ""),
+  }))
+  .handler(async ({ data }) => {
+    const { requestAiFeedback } = await import("./portal.server");
+    return requestAiFeedback(data.token, data.photoId);
+  });
