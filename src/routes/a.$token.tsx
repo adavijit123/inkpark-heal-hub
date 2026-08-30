@@ -310,8 +310,9 @@ function FollowButton({
       onClick={onPress}
       disabled={busy}
       aria-pressed={following}
+      style={{ fontSize: "0.8125rem" }}
       className={cn(
-        "ink-label mt-4 flex w-full items-center justify-center gap-2 rounded-full border py-2.5 transition-all duration-200 active:scale-[0.98]",
+        "ink-label mt-5 flex w-full items-center justify-center gap-2.5 rounded-full border px-5 py-4 tracking-[0.16em] transition-all duration-200 active:scale-[0.98]",
         following
           ? "animate-emoji-pop border-foreground bg-foreground text-background"
           : "border-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground",
@@ -319,7 +320,7 @@ function FollowButton({
     >
       <span
         className={cn(
-          "flex size-4 items-center justify-center rounded-full border text-[10px] leading-none",
+          "flex size-5 items-center justify-center rounded-full border text-[11px] leading-none",
           following ? "border-background/60" : "border-current",
         )}
       >
