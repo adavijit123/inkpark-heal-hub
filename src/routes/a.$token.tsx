@@ -11,6 +11,7 @@ import {
   requestPhotoAiFeedback,
   sendSupport,
   startPortalUpload,
+  toggleStageFollowed,
 } from "@/lib/portal.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -99,7 +100,7 @@ function Portal() {
     );
   }
 
-  const { tattoo, client, artist, stages, photos, settings } = portal.data;
+  const { tattoo, client, artist, stages, photos, settings, followedStages } = portal.data;
   const day = dayCount(tattoo.tattoo_date);
   const currentStage =
     stages.find((s) => day >= s.day_from && (s.day_to === null || day <= s.day_to)) ?? stages[stages.length - 1];
@@ -203,6 +204,13 @@ function Portal() {
                     <Instruction label={lang === "bn" ? BN_LABELS.normal : "Normal"} text={t.normal} />
                     <Instruction label={lang === "bn" ? BN_LABELS.contact : "Call us if"} text={t.contact} />
                   </div>
+                  <FollowButton
+                    token={token}
+                    stageId={s.id}
+                    following={followedStages.includes(s.id)}
+                    lang={lang}
+                    onSaved={() => qc.invalidateQueries({ queryKey: ["portal", token] })}
+                  />
                 </li>
               );
             })}
@@ -264,6 +272,66 @@ function SectionButton({
       >
         {active ? "−" : "+"}
       </span>
+    </button>
+  );
+}
+
+function FollowButton({
+  token,
+  stageId,
+  following,
+  lang,
+  onSaved,
+}: {
+  token: string;
+  stageId: string;
+  following: boolean;
+  lang: "en" | "bn";
+  onSaved: () => void;
+}) {
+  const toggle = useServerFn(toggleStageFollowed);
+  const [busy, setBusy] = useState(false);
+
+  async function onPress() {
+    setBusy(true);
+    try {
+      await toggle({ data: { token, stageId } });
+      onSaved();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't save");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onPress}
+      disabled={busy}
+      aria-pressed={following}
+      className={cn(
+        "ink-label mt-4 flex w-full items-center justify-center gap-2 rounded-full border py-2.5 transition-all duration-200 active:scale-[0.98]",
+        following
+          ? "animate-emoji-pop border-foreground bg-foreground text-background"
+          : "border-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground",
+      )}
+    >
+      <span
+        className={cn(
+          "flex size-4 items-center justify-center rounded-full border text-[10px] leading-none",
+          following ? "border-background/60" : "border-current",
+        )}
+      >
+        {following ? "✓" : ""}
+      </span>
+      {following
+        ? lang === "bn"
+          ? "আমি ধাপগুলো ফলো করছি ✓"
+          : "I'm following these steps"
+        : lang === "bn"
+          ? "আমি ধাপগুলো ফলো করছি"
+          : "Mark as following"}
     </button>
   );
 }

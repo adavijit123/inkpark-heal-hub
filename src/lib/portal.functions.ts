@@ -72,6 +72,16 @@ export const reactToArtistFeedback = createServerFn({ method: "POST" })
     return saveClientReaction(data.token, data.photoId, data.reaction);
   });
 
+export const toggleStageFollowed = createServerFn({ method: "POST" })
+  .inputValidator((d: { token: string; stageId: string }) => ({
+    token: String(d.token ?? ""),
+    stageId: String(d.stageId ?? ""),
+  }))
+  .handler(async ({ data }) => {
+    const { toggleStageFollow } = await import("./portal.server");
+    return toggleStageFollow(data.token, data.stageId);
+  });
+
 export const requestPhotoAiFeedback = createServerFn({ method: "POST" })
   .inputValidator((d: { token: string; photoId: string }) => ({
     token: String(d.token ?? ""),

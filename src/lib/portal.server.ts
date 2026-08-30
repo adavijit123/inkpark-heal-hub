@@ -49,6 +49,7 @@ export type PortalData = {
   artist: { name: string; instagram: string | null } | null;
   stages: PortalStage[];
   photos: PortalHealingPhoto[];
+  followedStages: string[];
   settings: {
     whatsapp_number: string | null;
     contact_email: string | null;
@@ -79,7 +80,7 @@ async function signed(bucket: string, path: string | null) {
 export async function loadPortal(token: string): Promise<PortalData> {
   const tattoo = await resolveTattoo(token);
 
-  const [clientRes, artistRes, stagesRes, photosRes, settingsRes] = await Promise.all([
+  const [clientRes, artistRes, stagesRes, photosRes, settingsRes, followsRes] = await Promise.all([
     supabaseAdmin.from("clients").select("full_name").eq("id", tattoo.client_id).maybeSingle(),
     tattoo.artist_id
       ? supabaseAdmin.from("artists").select("name, instagram").eq("id", tattoo.artist_id).maybeSingle()
@@ -97,6 +98,7 @@ export async function loadPortal(token: string): Promise<PortalData> {
       .from("studio_settings")
       .select("whatsapp_number, contact_email, review_url, booking_url")
       .maybeSingle(),
+    supabaseAdmin.from("stage_follows").select("stage_id").eq("tattoo_id", tattoo.id),
   ]);
 
   const photos = await Promise.all(
@@ -129,6 +131,7 @@ export async function loadPortal(token: string): Promise<PortalData> {
     artist: artistRes.data ? { name: artistRes.data.name, instagram: artistRes.data.instagram } : null,
     stages: (stagesRes.data ?? []) as PortalStage[],
     photos,
+    followedStages: (followsRes.data ?? []).map((f) => f.stage_id as string),
     settings: settingsRes.data ?? null,
   };
 }
@@ -200,6 +203,32 @@ export async function sendSupportMessage(token: string, message: string, storage
     .insert({ tattoo_id: tattoo.id, message: text, storage_path: storagePath });
   if (error) fail(error.message);
   return { ok: true };
+}
+
+export async function toggleStageFollow(token: string, stageId: string) {
+  const tattoo = await resolveTattoo(token);
+  const { data: stage } = await supabaseAdmin
+    .from("aftercare_stages")
+    .select("id")
+    .eq("id", stageId)
+    .maybeSingle();
+  if (!stage) fail("Unknown stage");
+  const { data: existing } = await supabaseAdmin
+    .from("stage_follows")
+    .select("id")
+    .eq("tattoo_id", tattoo.id)
+    .eq("stage_id", stageId)
+    .maybeSingle();
+  if (existing) {
+    const { error } = await supabaseAdmin.from("stage_follows").delete().eq("id", existing.id);
+    if (error) fail(error.message);
+    return { ok: true, following: false };
+  }
+  const { error } = await supabaseAdmin
+    .from("stage_follows")
+    .insert({ tattoo_id: tattoo.id, stage_id: stageId });
+  if (error) fail(error.message);
+  return { ok: true, following: true };
 }
 
 export async function markPortalAction(token: string, action: "review" | "rebooking") {
