@@ -172,50 +172,26 @@ function Portal() {
       {openSection === "timeline" ? (
         <section className="mt-8">
           <div className="flex items-baseline justify-between gap-3">
-            <h2 className="text-2xl text-foreground">{lang === "bn" ? BN_LABELS.timeline : "Healing timeline"}</h2>
+            <h2 className="text-2xl text-foreground">Healing timeline</h2>
           </div>
           <button className="ink-label mt-2 underline" onClick={() => setShowAllStages((v) => !v)}>
-            {showAllStages
-              ? lang === "bn"
-                ? BN_LABELS.showToday
-                : "Show today only"
-              : lang === "bn"
-                ? BN_LABELS.showAll
-                : "See all stages"}
+            {showAllStages ? "Show today only" : "See all stages"}
           </button>
           {!showAllStages ? (
             <p className="mt-1 text-sm text-muted-foreground">
-              {lang === "bn"
-                ? `আজকের যত্ন দেখানো হচ্ছে — দিন ${day}${nextDay ? ` · পরের চেকপয়েন্ট দিন ${nextDay}` : ""}।`
-                : `Showing today's care only — day ${day}${nextDay ? ` · next checkpoint day ${nextDay}` : ""}.`}
+              {`Showing today's care only — day ${day}${nextDay ? ` · next checkpoint day ${nextDay}` : ""}.`}
             </p>
           ) : null}
           <ol className="mt-4 space-y-3">
             {(showAllStages ? stages : stages.filter((s) => s.id === currentStage?.id)).map((s) => {
               const active = currentStage?.id === s.id;
-              const done = s.day_to !== null && day > s.day_to;
               const bn = lang === "bn" ? BN_STAGES[s.slug] : undefined;
               const t = bn ?? s;
-              const state = done
-                ? lang === "bn"
-                  ? BN_LABELS.done
-                  : "done"
-                : active
-                  ? lang === "bn"
-                    ? BN_LABELS.now
-                    : "now"
-                  : lang === "bn"
-                    ? BN_LABELS.soon
-                    : "soon";
               return (
                 <li key={s.id} className={`ink-card p-5 ${active ? "border-foreground" : ""}`}>
                   <div className="flex items-center justify-between gap-3">
                     <h3 className="text-xl text-foreground">{t.title}</h3>
-                    {showAllStages ? (
-                      <span className="ink-label shrink-0">{state}</span>
-                    ) : (
-                      <LangToggle lang={lang} setLang={setLang} />
-                    )}
+                    <LangToggle lang={lang} setLang={setLang} />
                   </div>
                   {t.subtitle ? <p className="mt-1 text-sm text-muted-foreground">{t.subtitle}</p> : null}
                   <div className="mt-4 space-y-3 text-sm text-foreground">
