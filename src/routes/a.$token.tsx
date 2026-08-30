@@ -267,7 +267,35 @@ function Portal() {
   );
 }
 
+function SectionButton({
+  active,
+  title,
+  subtitle,
+  onClick,
+}: {
+  active: boolean;
+  title: string;
+  subtitle: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`ink-card flex w-full items-center justify-between gap-4 p-5 text-left transition-colors ${
+        active ? "border-foreground bg-foreground text-background" : ""
+      }`}
+    >
+      <span>
+        <span className="block text-xl">{title}</span>
+        <span className={`mt-1 block text-xs ${active ? "opacity-70" : "text-muted-foreground"}`}>{subtitle}</span>
+      </span>
+      <span className="text-2xl leading-none">{active ? "−" : "+"}</span>
+    </button>
+  );
+}
+
 function Centered({ children }: { children: React.ReactNode }) {
+
 
   return (
     <main className="flex min-h-screen items-center justify-center px-6 text-center text-sm text-muted-foreground">
