@@ -89,7 +89,7 @@ export async function loadPortal(token: string): Promise<PortalData> {
       .order("sort_order"),
     supabaseAdmin
       .from("healing_photos")
-      .select("id, day_marker, note, created_at, storage_path, ai_feedback, ai_status, artist_feedback, artist_feedback_at")
+      .select("id, day_marker, note, created_at, storage_path, ai_feedback, ai_status, artist_feedback, artist_feedback_at, client_reaction")
       .eq("tattoo_id", tattoo.id)
       .order("day_marker"),
     supabaseAdmin
@@ -109,6 +109,7 @@ export async function loadPortal(token: string): Promise<PortalData> {
       ai_status: p.ai_status,
       artist_feedback: p.artist_feedback,
       artist_feedback_at: p.artist_feedback_at,
+      client_reaction: p.client_reaction,
     })),
   );
 
