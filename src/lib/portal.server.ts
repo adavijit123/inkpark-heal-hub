@@ -131,6 +131,7 @@ export async function loadPortal(token: string): Promise<PortalData> {
     artist: artistRes.data ? { name: artistRes.data.name, instagram: artistRes.data.instagram } : null,
     stages: (stagesRes.data ?? []) as PortalStage[],
     photos,
+    followedStages: (followsRes.data ?? []).map((f) => f.stage_id as string),
     settings: settingsRes.data ?? null,
   };
 }
@@ -202,6 +203,32 @@ export async function sendSupportMessage(token: string, message: string, storage
     .insert({ tattoo_id: tattoo.id, message: text, storage_path: storagePath });
   if (error) fail(error.message);
   return { ok: true };
+}
+
+export async function toggleStageFollow(token: string, stageId: string) {
+  const tattoo = await resolveTattoo(token);
+  const { data: stage } = await supabaseAdmin
+    .from("aftercare_stages")
+    .select("id")
+    .eq("id", stageId)
+    .maybeSingle();
+  if (!stage) fail("Unknown stage");
+  const { data: existing } = await supabaseAdmin
+    .from("stage_follows")
+    .select("id")
+    .eq("tattoo_id", tattoo.id)
+    .eq("stage_id", stageId)
+    .maybeSingle();
+  if (existing) {
+    const { error } = await supabaseAdmin.from("stage_follows").delete().eq("id", existing.id);
+    if (error) fail(error.message);
+    return { ok: true, following: false };
+  }
+  const { error } = await supabaseAdmin
+    .from("stage_follows")
+    .insert({ tattoo_id: tattoo.id, stage_id: stageId });
+  if (error) fail(error.message);
+  return { ok: true, following: true };
 }
 
 export async function markPortalAction(token: string, action: "review" | "rebooking") {
