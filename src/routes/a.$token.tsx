@@ -201,15 +201,32 @@ function PhotoTracker({
   day,
 }: {
   token: string;
-  photos: { id: string; day_marker: number; note: string | null; url: string | null }[];
+  photos: TrackerPhoto[];
   qc: ReturnType<typeof useQueryClient>;
   day: number;
 }) {
   const startUpload = useServerFn(startPortalUpload);
   const save = useServerFn(addHealingPhoto);
   const remove = useServerFn(removeHealingPhoto);
+  const askAi = useServerFn(requestPhotoAiFeedback);
   const [busy, setBusy] = useState<number | null>(null);
+  const [aiBusy, setAiBusy] = useState<string | null>(null);
   const [note, setNote] = useState("");
+
+  const doneDays = HEALING_DAYS.filter((d) => photos.some((p) => p.day_marker === d)).length;
+
+  async function runAi(photoId: string, silent = false) {
+    setAiBusy(photoId);
+    try {
+      await askAi({ data: { token, photoId } });
+      if (!silent) toast.success("AI feedback ready");
+      qc.invalidateQueries({ queryKey: ["portal", token] });
+    } catch (e) {
+      if (!silent) toast.error(e instanceof Error ? e.message : "AI feedback failed");
+    } finally {
+      setAiBusy(null);
+    }
+  }
 
   async function upload(file: File, marker: number) {
     setBusy(marker);
@@ -221,8 +238,12 @@ function PhotoTracker({
       if (error) throw new Error(error.message);
       await save({ data: { token, dayMarker: marker, storagePath: target.path, note: note || null } });
       setNote("");
-      toast.success("Photo saved privately");
-      qc.invalidateQueries({ queryKey: ["portal", token] });
+      toast.success("Photo saved privately · asking AI for a check…");
+      const fresh = await qc.invalidateQueries({ queryKey: ["portal", token] });
+      void fresh;
+      const latest = qc.getQueryData<{ photos: TrackerPhoto[] }>(["portal", token]);
+      const created = latest?.photos.find((p) => p.day_marker === marker && !p.ai_feedback);
+      if (created) await runAi(created.id, true);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Upload failed");
     } finally {
@@ -234,11 +255,27 @@ function PhotoTracker({
     <section className="mt-10">
       <h2 className="text-2xl text-foreground">Healing photo tracker</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Private to you and your artist. Track how the ink settles.
+        Day 1 to day 30. Upload a photo at each checkpoint — AI gives you an instant healing check and your artist can
+        reply personally.
       </p>
 
+      <div className="ink-card mt-4 p-5">
+        <div className="flex items-baseline justify-between">
+          <span className="ink-label">Progress</span>
+          <span className="text-sm text-foreground">
+            {doneDays}/{HEALING_DAYS.length} checkpoints
+          </span>
+        </div>
+        <div className="mt-3 h-1 w-full bg-border">
+          <div
+            className="h-1 bg-foreground transition-all"
+            style={{ width: `${(doneDays / HEALING_DAYS.length) * 100}%` }}
+          />
+        </div>
+      </div>
+
       <div className="mt-4 space-y-2">
-        <Label htmlFor="note">Note (optional)</Label>
+        <Label htmlFor="note">Note for your next upload (optional)</Label>
         <Input id="note" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Feels itchy today" />
       </div>
 
@@ -247,32 +284,66 @@ function PhotoTracker({
           const shots = photos.filter((p) => p.day_marker === marker);
           const unlocked = day >= marker;
           return (
-            <div key={marker} className="ink-card p-5">
+            <div key={marker} className={`ink-card p-5 ${unlocked && !shots.length ? "border-foreground" : ""}`}>
               <div className="flex items-center justify-between">
                 <h3 className="text-lg text-foreground">Day {marker}</h3>
-                <span className="ink-label">{shots.length ? `${shots.length} photo(s)` : unlocked ? "open" : "upcoming"}</span>
+                <span className="ink-label">
+                  {shots.length ? `${shots.length} photo${shots.length > 1 ? "s" : ""}` : unlocked ? "due now" : "upcoming"}
+                </span>
               </div>
 
               {shots.length ? (
-                <div className="mt-3 grid grid-cols-3 gap-2">
+                <ul className="mt-3 space-y-4">
                   {shots.map((p) => (
-                    <figure key={p.id} className="relative">
-                      {p.url ? (
-                        <img src={p.url} alt={`Your healing photo from day ${marker}`} className="aspect-square w-full rounded-md object-cover" />
-                      ) : null}
-                      <button
-                        onClick={async () => {
-                          await remove({ data: { token, photoId: p.id } });
-                          qc.invalidateQueries({ queryKey: ["portal", token] });
-                        }}
-                        className="absolute right-1 top-1 rounded bg-background/90 px-1.5 text-xs text-foreground"
-                        aria-label="Delete photo"
-                      >
-                        ×
-                      </button>
-                    </figure>
+                    <li key={p.id} className="space-y-3">
+                      <div className="flex gap-3">
+                        {p.url ? (
+                          <img
+                            src={p.url}
+                            alt={`Your healing photo from day ${marker}`}
+                            className="h-24 w-24 shrink-0 rounded-md object-cover"
+                          />
+                        ) : null}
+                        <div className="min-w-0 flex-1">
+                          {p.note ? <p className="text-sm text-foreground">“{p.note}”</p> : null}
+                          <button
+                            onClick={async () => {
+                              await remove({ data: { token, photoId: p.id } });
+                              qc.invalidateQueries({ queryKey: ["portal", token] });
+                            }}
+                            className="ink-label mt-2 underline"
+                          >
+                            Delete photo
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="rounded-md border border-border p-3">
+                        <p className="ink-label">AI healing check</p>
+                        {p.ai_feedback ? (
+                          <p className="mt-2 whitespace-pre-line text-sm text-foreground">{p.ai_feedback}</p>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-2"
+                            disabled={aiBusy === p.id}
+                            onClick={() => runAi(p.id)}
+                          >
+                            {aiBusy === p.id ? "Checking…" : "Get AI feedback"}
+                          </Button>
+                        )}
+                      </div>
+
+                      <div className="rounded-md border border-border p-3">
+                        <p className="ink-label">Artist feedback</p>
+                        <p className="mt-2 text-sm text-foreground">
+                          {p.artist_feedback ?? "Your artist hasn't replied to this photo yet."}
+                        </p>
+                      </div>
+                    </li>
                   ))}
-                </div>
+                </ul>
               ) : null}
 
               <Input
@@ -287,6 +358,7 @@ function PhotoTracker({
                   e.target.value = "";
                 }}
               />
+              {busy === marker ? <p className="ink-label mt-2">Uploading…</p> : null}
             </div>
           );
         })}
@@ -294,6 +366,7 @@ function PhotoTracker({
     </section>
   );
 }
+
 
 function SupportBox({ token, wa }: { token: string; wa: string | null }) {
   const send = useServerFn(sendSupport);
