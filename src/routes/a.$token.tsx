@@ -97,6 +97,9 @@ function Portal() {
   const currentStage =
     stages.find((s) => day >= s.day_from && (s.day_to === null || day <= s.day_to)) ?? stages[stages.length - 1];
   const healed = day > 30;
+  const nextDay = nextMarker(day);
+  const todayMarker = currentMarker(day);
+  const todayDone = photos.some((p) => p.day_marker === todayMarker);
 
   const wa = settings?.whatsapp_number
     ? `https://wa.me/${settings.whatsapp_number.replace(/[^\d]/g, "")}?text=${encodeURIComponent(
