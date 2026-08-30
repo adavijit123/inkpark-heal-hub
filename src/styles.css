@@ -167,3 +167,58 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-ink);
 }
+
+@keyframes emoji-pop {
+  0% {
+    transform: scale(0.55);
+  }
+  55% {
+    transform: scale(1.4) rotate(6deg);
+  }
+  100% {
+    transform: scale(1.12) rotate(0deg);
+  }
+}
+
+@keyframes emoji-wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(-12deg) scale(1.18);
+  }
+  50% {
+    transform: rotate(12deg) scale(1.18);
+  }
+  75% {
+    transform: rotate(-6deg) scale(1.1);
+  }
+}
+
+@keyframes emoji-float {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(calc(-50% + var(--dx) * 0.4), calc(-50% + var(--dy) * 0.4)) scale(0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.2);
+  }
+}
+
+@utility animate-emoji-pop {
+  animation: emoji-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@utility animate-emoji-wiggle {
+  animation: emoji-wiggle 0.45s ease-in-out;
+}
+
+@utility animate-emoji-float {
+  animation: emoji-float 0.9s ease-out forwards;
+}
