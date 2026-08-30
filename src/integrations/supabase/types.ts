@@ -14,16 +14,370 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      aftercare_stages: {
+        Row: {
+          avoid: string | null
+          cleaning: string | null
+          contact: string | null
+          day_from: number
+          day_to: number | null
+          id: string
+          moisturizing: string | null
+          normal: string | null
+          slug: string
+          sort_order: number
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          avoid?: string | null
+          cleaning?: string | null
+          contact?: string | null
+          day_from: number
+          day_to?: number | null
+          id?: string
+          moisturizing?: string | null
+          normal?: string | null
+          slug: string
+          sort_order?: number
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          avoid?: string | null
+          cleaning?: string | null
+          contact?: string | null
+          day_from?: number
+          day_to?: number | null
+          id?: string
+          moisturizing?: string | null
+          normal?: string | null
+          slug?: string
+          sort_order?: number
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      artists: {
+        Row: {
+          active: boolean
+          bio: string | null
+          created_at: string
+          id: string
+          instagram: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          bio?: string | null
+          created_at?: string
+          id?: string
+          instagram?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          bio?: string | null
+          created_at?: string
+          id?: string
+          instagram?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      clients: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          notes: string | null
+          phone: string | null
+          photo_sharing_consent: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          photo_sharing_consent?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          photo_sharing_consent?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      healing_photos: {
+        Row: {
+          created_at: string
+          day_marker: number
+          id: string
+          note: string | null
+          storage_path: string
+          tattoo_id: string
+        }
+        Insert: {
+          created_at?: string
+          day_marker: number
+          id?: string
+          note?: string | null
+          storage_path: string
+          tattoo_id: string
+        }
+        Update: {
+          created_at?: string
+          day_marker?: number
+          id?: string
+          note?: string | null
+          storage_path?: string
+          tattoo_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "healing_photos_tattoo_id_fkey"
+            columns: ["tattoo_id"]
+            isOneToOne: false
+            referencedRelation: "tattoos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      reminders: {
+        Row: {
+          channel: string
+          day_marker: number
+          enabled: boolean
+          id: string
+          scheduled_for: string
+          sent_at: string | null
+          tattoo_id: string
+        }
+        Insert: {
+          channel?: string
+          day_marker: number
+          enabled?: boolean
+          id?: string
+          scheduled_for: string
+          sent_at?: string | null
+          tattoo_id: string
+        }
+        Update: {
+          channel?: string
+          day_marker?: number
+          enabled?: boolean
+          id?: string
+          scheduled_for?: string
+          sent_at?: string | null
+          tattoo_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminders_tattoo_id_fkey"
+            columns: ["tattoo_id"]
+            isOneToOne: false
+            referencedRelation: "tattoos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      studio_settings: {
+        Row: {
+          booking_url: string | null
+          contact_email: string | null
+          id: boolean
+          review_url: string | null
+          updated_at: string
+          whatsapp_number: string | null
+        }
+        Insert: {
+          booking_url?: string | null
+          contact_email?: string | null
+          id?: boolean
+          review_url?: string | null
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Update: {
+          booking_url?: string | null
+          contact_email?: string | null
+          id?: boolean
+          review_url?: string | null
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
+      support_messages: {
+        Row: {
+          created_at: string
+          handled: boolean
+          id: string
+          message: string
+          storage_path: string | null
+          tattoo_id: string
+        }
+        Insert: {
+          created_at?: string
+          handled?: boolean
+          id?: string
+          message: string
+          storage_path?: string | null
+          tattoo_id: string
+        }
+        Update: {
+          created_at?: string
+          handled?: boolean
+          id?: string
+          message?: string
+          storage_path?: string | null
+          tattoo_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_messages_tattoo_id_fkey"
+            columns: ["tattoo_id"]
+            isOneToOne: false
+            referencedRelation: "tattoos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tattoos: {
+        Row: {
+          access_token: string
+          artist_id: string | null
+          client_id: string
+          created_at: string
+          id: string
+          photo_path: string | null
+          placement: string | null
+          rebooking_requested: boolean
+          review_submitted: boolean
+          style: string | null
+          tattoo_date: string
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string
+          artist_id?: string | null
+          client_id: string
+          created_at?: string
+          id?: string
+          photo_path?: string | null
+          placement?: string | null
+          rebooking_requested?: boolean
+          review_submitted?: boolean
+          style?: string | null
+          tattoo_date?: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          artist_id?: string | null
+          client_id?: string
+          created_at?: string
+          id?: string
+          photo_path?: string | null
+          placement?: string | null
+          rebooking_requested?: boolean
+          review_submitted?: boolean
+          style?: string | null
+          tattoo_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tattoos_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tattoos_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "artist"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +504,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "artist"],
+    },
   },
 } as const
