@@ -14,8 +14,6 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { UploadZone } from "@/components/UploadZone";
 import { toast } from "sonner";
 import { BN_LABELS, BN_STAGES } from "@/lib/aftercare-bn";
