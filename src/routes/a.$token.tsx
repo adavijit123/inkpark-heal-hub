@@ -185,29 +185,13 @@ function Portal() {
           <ol className="mt-4 space-y-3">
             {(showAllStages ? stages : stages.filter((s) => s.id === currentStage?.id)).map((s) => {
               const active = currentStage?.id === s.id;
-              const done = s.day_to !== null && day > s.day_to;
               const bn = lang === "bn" ? BN_STAGES[s.slug] : undefined;
               const t = bn ?? s;
-              const state = done
-                ? lang === "bn"
-                  ? BN_LABELS.done
-                  : "done"
-                : active
-                  ? lang === "bn"
-                    ? BN_LABELS.now
-                    : "now"
-                  : lang === "bn"
-                    ? BN_LABELS.soon
-                    : "soon";
               return (
                 <li key={s.id} className={`ink-card p-5 ${active ? "border-foreground" : ""}`}>
                   <div className="flex items-center justify-between gap-3">
                     <h3 className="text-xl text-foreground">{t.title}</h3>
-                    {showAllStages ? (
-                      <span className="ink-label shrink-0">{state}</span>
-                    ) : (
-                      <LangToggle lang={lang} setLang={setLang} />
-                    )}
+                    <LangToggle lang={lang} setLang={setLang} />
                   </div>
                   {t.subtitle ? <p className="mt-1 text-sm text-muted-foreground">{t.subtitle}</p> : null}
                   <div className="mt-4 space-y-3 text-sm text-foreground">
