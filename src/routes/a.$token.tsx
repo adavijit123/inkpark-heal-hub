@@ -337,6 +337,7 @@ function PhotoTracker({
   const startUpload = useServerFn(startPortalUpload);
   const save = useServerFn(addHealingPhoto);
   const remove = useServerFn(removeHealingPhoto);
+  const react = useServerFn(reactToArtistFeedback);
   const askAi = useServerFn(requestPhotoAiFeedback);
   const [busy, setBusy] = useState<number | null>(null);
   const [aiBusy, setAiBusy] = useState<string | null>(null);
