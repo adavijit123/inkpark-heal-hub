@@ -90,11 +90,16 @@ function Portal() {
   }
 
   if (portal.error || !portal.data) {
+    const expired = portal.error instanceof Error && portal.error.message.includes("EXPIRED_LINK");
     return (
       <Centered>
-        <span className="block text-lg text-foreground">This aftercare link isn't valid</span>
+        <span className="block text-lg text-foreground">
+          {expired ? "This aftercare page has closed" : "This aftercare link isn't valid"}
+        </span>
         <span className="mt-2 block text-sm text-muted-foreground">
-          Ask your InkPark artist to resend your personal link.
+          {expired
+            ? "Your 30-day healing window is complete, so the link is now deactivated. Your photos and notes are safely kept in your InkPark client record — message the studio if you need them."
+            : "Ask your InkPark artist to resend your personal link."}
         </span>
       </Centered>
     );
