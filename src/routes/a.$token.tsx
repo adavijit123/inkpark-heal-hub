@@ -521,7 +521,12 @@ function PhotoTracker({
         <div className="mt-3 flex justify-center">
           <button
             onClick={() => setShowAll((v) => !v)}
-            className="ink-label inline-flex items-center justify-center rounded-full border border-foreground/30 px-4 py-2 tracking-[0.12em] text-muted-foreground transition-all duration-200 hover:border-foreground hover:text-foreground active:scale-[0.98]"
+            className={cn(
+              "ink-label inline-flex items-center justify-center rounded-full border px-4 py-2 tracking-[0.12em] transition-all duration-300 active:scale-[0.98]",
+              showAll
+                ? "animate-emoji-pop border-foreground bg-foreground text-background"
+                : "border-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground",
+            )}
           >
             {showAll ? "Show today only" : "See all days"}
           </button>
