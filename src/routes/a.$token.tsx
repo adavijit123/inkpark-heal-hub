@@ -255,6 +255,10 @@ function PhotoTracker({
   const [busy, setBusy] = useState<number | null>(null);
   const [aiBusy, setAiBusy] = useState<string | null>(null);
   const [note, setNote] = useState("");
+  const [showAll, setShowAll] = useState(false);
+  const visibleDays = showAll
+    ? HEALING_DAYS
+    : HEALING_DAYS.filter((d) => d === currentMarker(day) || photos.some((p) => p.day_marker === d && d > day));
 
   const doneDays = HEALING_DAYS.filter((d) => photos.some((p) => p.day_marker === d)).length;
 
