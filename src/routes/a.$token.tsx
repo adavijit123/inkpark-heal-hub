@@ -368,8 +368,7 @@ function PhotoTracker({
         .from(target.bucket)
         .uploadToSignedUrl(target.path, target.token, file);
       if (error) throw new Error(error.message);
-      await save({ data: { token, dayMarker: marker, storagePath: target.path, note: note || null } });
-      setNote("");
+      await save({ data: { token, dayMarker: marker, storagePath: target.path } });
       toast.success("Photo saved privately · asking AI for a check…");
       const fresh = await qc.invalidateQueries({ queryKey: ["portal", token] });
       void fresh;
