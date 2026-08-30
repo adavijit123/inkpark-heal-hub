@@ -290,6 +290,32 @@ function SectionButton({
   );
 }
 
+function LangToggle({
+  lang,
+  setLang,
+}: {
+  lang: "en" | "bn";
+  setLang: (l: "en" | "bn") => void;
+}) {
+  const base = "ink-label rounded-full px-3 py-1.5 transition-colors";
+  return (
+    <div className="flex shrink-0 items-center rounded-full border border-foreground/30 p-1">
+      <button
+        onClick={() => setLang("en")}
+        className={`${base} ${lang === "en" ? "bg-foreground text-background" : "text-muted-foreground"}`}
+      >
+        English
+      </button>
+      <button
+        onClick={() => setLang("bn")}
+        className={`${base} ${lang === "bn" ? "bg-foreground text-background" : "text-muted-foreground"}`}
+      >
+        বাংলা
+      </button>
+    </div>
+  );
+}
+
 function Centered({ children }: { children: React.ReactNode }) {
 
 
