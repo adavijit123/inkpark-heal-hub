@@ -7,6 +7,7 @@ import {
   getPortal,
   markPortalStep,
   removeHealingPhoto,
+  requestPhotoAiFeedback,
   sendSupport,
   startPortalUpload,
 } from "@/lib/portal.functions";
