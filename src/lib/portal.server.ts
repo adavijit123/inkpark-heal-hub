@@ -49,6 +49,7 @@ export type PortalData = {
   artist: { name: string; instagram: string | null } | null;
   stages: PortalStage[];
   photos: PortalHealingPhoto[];
+  followedStages: string[];
   settings: {
     whatsapp_number: string | null;
     contact_email: string | null;
