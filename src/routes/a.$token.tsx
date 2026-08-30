@@ -414,7 +414,7 @@ function PhotoTracker({
             <div className="relative flex justify-between">
               {HEALING_DAYS.map((m) => {
                 const shot = photos.some((p) => p.day_marker === m);
-                const isCurrent = m === todayMarker;
+                const isCurrent = m === currentMarker(day);
                 return (
                   <div key={m} className="flex flex-col items-center gap-1.5">
                     <div
