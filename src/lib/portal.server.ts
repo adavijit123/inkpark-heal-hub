@@ -58,6 +58,16 @@ export type PortalData = {
   } | null;
 };
 
+export const ACCESS_DAYS = 30;
+export const EXPIRED_MESSAGE = "EXPIRED_LINK";
+
+export function daysSince(dateStr: string) {
+  const start = new Date(`${dateStr}T00:00:00Z`).getTime();
+  const today = new Date();
+  const now = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+  return Math.floor((now - start) / 86400000);
+}
+
 async function resolveTattoo(token: string) {
   const clean = token.trim();
   if (!clean || clean.length < 16 || !/^[a-f0-9]+$/i.test(clean)) fail("Invalid link");
@@ -68,6 +78,9 @@ async function resolveTattoo(token: string) {
     .maybeSingle();
   if (error) fail(error.message);
   if (!data) fail("This aftercare link is not valid.");
+  // Client access is valid for 30 days from the tattoo date. All records stay
+  // in the studio database — only the public link stops working.
+  if (daysSince(data.tattoo_date) > ACCESS_DAYS) fail(EXPIRED_MESSAGE);
   return data;
 }
 
