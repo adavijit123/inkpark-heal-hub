@@ -209,13 +209,15 @@ function Portal() {
                     <Instruction label={lang === "bn" ? BN_LABELS.normal : "Normal"} text={t.normal} />
                     <Instruction label={lang === "bn" ? BN_LABELS.contact : "Call us if"} text={t.contact} />
                   </div>
-                  <FollowButton
-                    token={token}
-                    stageId={s.id}
-                    following={followedStages.includes(s.id)}
-                    lang={lang}
-                    onSaved={() => qc.invalidateQueries({ queryKey: ["portal", token] })}
-                  />
+                  <div className="mt-4 flex justify-center">
+                    <FollowButton
+                      token={token}
+                      stageId={s.id}
+                      following={followedStages.includes(s.id)}
+                      lang={lang}
+                      onSaved={() => qc.invalidateQueries({ queryKey: ["portal", token] })}
+                    />
+                  </div>
                 </li>
               );
             })}
