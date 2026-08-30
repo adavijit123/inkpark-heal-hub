@@ -17,7 +17,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
-const HEALING_DAYS = [1, 3, 7, 14, 30];
+const HEALING_DAYS = [1, 2, 3, 5, 7, 10, 14, 21, 30];
+
+type TrackerPhoto = {
+  id: string;
+  day_marker: number;
+  note: string | null;
+  url: string | null;
+  ai_feedback: string | null;
+  ai_status: string;
+  artist_feedback: string | null;
+};
+
 
 export const Route = createFileRoute("/a/$token")({
   head: () => ({
