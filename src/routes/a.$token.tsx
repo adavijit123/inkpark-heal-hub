@@ -75,6 +75,7 @@ function Portal() {
     queryFn: () => portalFn({ data: { token } }),
     retry: false,
   });
+  const [showAllStages, setShowAllStages] = useState(false);
 
   if (portal.isPending) {
     return <Centered>Loading your aftercare…</Centered>;
