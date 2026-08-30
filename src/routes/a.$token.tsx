@@ -18,7 +18,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
-const HEALING_DAYS = [1, 2, 3, 5, 7, 10, 14, 21, 30];
+const HEALING_DAYS = [1, 2, 3, 5, 7, 15, 30];
+
+function currentMarker(day: number) {
+  const due = HEALING_DAYS.filter((d) => d <= day);
+  return due.length ? due[due.length - 1] : HEALING_DAYS[0];
+}
+
+function nextMarker(day: number) {
+  return HEALING_DAYS.find((d) => d > day) ?? null;
+}
 
 type TrackerPhoto = {
   id: string;
@@ -66,6 +75,7 @@ function Portal() {
     queryFn: () => portalFn({ data: { token } }),
     retry: false,
   });
+  const [showAllStages, setShowAllStages] = useState(false);
 
   if (portal.isPending) {
     return <Centered>Loading your aftercare…</Centered>;
@@ -87,6 +97,9 @@ function Portal() {
   const currentStage =
     stages.find((s) => day >= s.day_from && (s.day_to === null || day <= s.day_to)) ?? stages[stages.length - 1];
   const healed = day > 30;
+  const nextDay = nextMarker(day);
+  const todayMarker = currentMarker(day);
+  const todayDone = photos.some((p) => p.day_marker === todayMarker);
 
   const wa = settings?.whatsapp_number
     ? `https://wa.me/${settings.whatsapp_number.replace(/[^\d]/g, "")}?text=${encodeURIComponent(
@@ -104,6 +117,24 @@ function Portal() {
         </p>
       </header>
 
+      <div className="ink-card mt-6 border-foreground p-5">
+        <p className="ink-label">Today's reminder</p>
+        <p className="mt-2 text-lg text-foreground">
+          {healed
+            ? "Your tattoo is fully healed — keep it moisturised and out of strong sun."
+            : `Day ${day} — ${
+                todayDone
+                  ? `day ${todayMarker} photo is saved. Next checkpoint${nextDay ? `: day ${nextDay}` : ": all done"}.`
+                  : `time for your day ${todayMarker} photo and today's care steps.`
+              }`}
+        </p>
+        {currentStage ? (
+          <p className="mt-2 text-sm text-muted-foreground">{currentStage.title}</p>
+        ) : null}
+      </div>
+
+
+
       {tattoo.photo_url ? (
         <img
           src={tattoo.photo_url}
@@ -119,9 +150,20 @@ function Portal() {
       </dl>
 
       <section className="mt-10">
-        <h2 className="text-2xl text-foreground">Healing timeline</h2>
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="text-2xl text-foreground">Healing timeline</h2>
+          <button className="ink-label underline" onClick={() => setShowAllStages((v) => !v)}>
+            {showAllStages ? "Show today only" : "See all stages"}
+          </button>
+        </div>
+        {!showAllStages ? (
+          <p className="mt-1 text-sm text-muted-foreground">
+            Showing today's care only — day {day}
+            {nextDay ? ` · next checkpoint day ${nextDay}` : ""}.
+          </p>
+        ) : null}
         <ol className="mt-4 space-y-3">
-          {stages.map((s) => {
+          {(showAllStages ? stages : stages.filter((s) => s.id === currentStage?.id)).map((s) => {
             const active = currentStage?.id === s.id;
             const done = s.day_to !== null && day > s.day_to;
             return (
@@ -213,6 +255,10 @@ function PhotoTracker({
   const [busy, setBusy] = useState<number | null>(null);
   const [aiBusy, setAiBusy] = useState<string | null>(null);
   const [note, setNote] = useState("");
+  const [showAll, setShowAll] = useState(false);
+  const visibleDays = showAll
+    ? HEALING_DAYS
+    : HEALING_DAYS.filter((d) => d === currentMarker(day) || photos.some((p) => p.day_marker === d && d > day));
 
   const doneDays = HEALING_DAYS.filter((d) => photos.some((p) => p.day_marker === d)).length;
 
@@ -254,10 +300,14 @@ function PhotoTracker({
 
   return (
     <section className="mt-10">
-      <h2 className="text-2xl text-foreground">Healing photo tracker</h2>
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="text-2xl text-foreground">Healing photo tracker</h2>
+        <button className="ink-label underline" onClick={() => setShowAll((v) => !v)}>
+          {showAll ? "Show today only" : "See all days"}
+        </button>
+      </div>
       <p className="mt-1 text-sm text-muted-foreground">
-        Day 1 to day 30. Upload a photo at each checkpoint — AI gives you an instant healing check and your artist can
-        reply personally.
+        Checkpoints: day 1, 2, 3, 5, 7, 15 and 30. {showAll ? "All checkpoints shown." : `Today you're on day ${day}.`}
       </p>
 
       <div className="ink-card mt-4 p-5">
@@ -281,7 +331,7 @@ function PhotoTracker({
       </div>
 
       <div className="mt-4 space-y-3">
-        {HEALING_DAYS.map((marker) => {
+        {visibleDays.map((marker) => {
           const shots = photos.filter((p) => p.day_marker === marker);
           const unlocked = day >= marker;
           return (
