@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import {
   addHealingPhoto,
   getPortal,
@@ -529,33 +529,12 @@ function PhotoTracker({
                           {p.artist_feedback ?? "Your artist hasn't replied to this photo yet."}
                         </p>
                         {p.artist_feedback ? (
-                          <div className="mt-3 border-t border-border pt-3">
-                            <p className="ink-label">How does this make you feel?</p>
-                            <div className="mt-2 flex gap-2">
-                              {["❤️", "😊", "👍", "😢", "😟"].map((emoji) => (
-                                <button
-                                  key={emoji}
-                                  aria-label={`React with ${emoji}`}
-                                  onClick={async () => {
-                                    try {
-                                      await react({ data: { token, photoId: p.id, reaction: emoji } });
-                                      qc.invalidateQueries({ queryKey: ["portal", token] });
-                                    } catch (e) {
-                                      toast.error(e instanceof Error ? e.message : "Couldn't save reaction");
-                                    }
-                                  }}
-                                  className={cn(
-                                    "flex size-9 items-center justify-center rounded-full border text-lg transition-all",
-                                    p.client_reaction === emoji
-                                      ? "scale-110 border-foreground bg-foreground/10"
-                                      : "border-border hover:border-foreground/50"
-                                  )}
-                                >
-                                  {emoji}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
+                          <ReactionBar
+                            token={token}
+                            photoId={p.id}
+                            current={p.client_reaction}
+                            onSaved={() => qc.invalidateQueries({ queryKey: ["portal", token] })}
+                          />
                         ) : null}
                       </div>
                     </li>
@@ -623,6 +602,91 @@ function SupportBox({ token, wa }: { token: string; wa: string | null }) {
         ) : null}
       </div>
     </section>
+  );
+}
+
+const REACTIONS = ["❤️", "😊", "👍", "😢", "😟"] as const;
+
+function ReactionBar({
+  token,
+  photoId,
+  current,
+  onSaved,
+}: {
+  token: string;
+  photoId: string;
+  current: string | null;
+  onSaved: () => void;
+}) {
+  const react = useServerFn(reactToArtistFeedback);
+  const [burst, setBurst] = useState<{ emoji: string; id: number } | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  async function pick(emoji: string) {
+    setBurst({ emoji, id: Date.now() });
+    setSaved(false);
+    try {
+      await react({ data: { token, photoId, reaction: emoji } });
+      setSaved(true);
+      onSaved();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't save reaction");
+    }
+  }
+
+  return (
+    <div className="mt-3 border-t border-border pt-3">
+      <p className="ink-label">How does this make you feel?</p>
+      <div className="relative mt-2 flex gap-2">
+        {burst ? (
+          <div key={burst.id} className="pointer-events-none absolute inset-0 z-10" aria-hidden>
+            {[-2, -1.2, 0, 1.2, 2].map((i, idx) => (
+              <span
+                key={idx}
+                className="animate-emoji-float absolute left-1/2 top-1/2 text-lg will-change-transform"
+                style={
+                  {
+                    "--dx": `${i * 22}px`,
+                    "--dy": `${-30 - Math.abs(i) * 10 - (idx % 2 === 0 ? 8 : 0)}px`,
+                    animationDelay: `${idx * 60}ms`,
+                  } as CSSProperties
+                }
+              >
+                {burst.emoji}
+              </span>
+            ))}
+          </div>
+        ) : null}
+        {REACTIONS.map((emoji) => (
+          <button
+            key={emoji}
+            type="button"
+            aria-label={`React with ${emoji}`}
+            aria-pressed={current === emoji}
+            onClick={() => pick(emoji)}
+            className={cn(
+              "group flex size-10 items-center justify-center rounded-full border text-lg transition-all duration-200 active:scale-90",
+              current === emoji
+                ? "animate-emoji-pop border-foreground bg-foreground/10 shadow-[0_0_0_3px_oklch(0_0_0/0.06)]"
+                : "border-border hover:border-foreground/50",
+            )}
+          >
+            <span className="block group-hover:animate-emoji-wiggle group-active:animate-emoji-wiggle">
+              {emoji}
+            </span>
+          </button>
+        ))}
+      </div>
+      <p
+        aria-live="polite"
+        className={cn(
+          "ink-label mt-2 transition-opacity duration-300",
+          saved ? "opacity-100" : "opacity-0"
+        )}
+      >
+        Saved ✓
+      </p>
+    </div>
   );
 }
 
