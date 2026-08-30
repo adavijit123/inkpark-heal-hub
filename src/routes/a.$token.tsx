@@ -486,16 +486,22 @@ function PhotoTracker({
                           >
                             Delete photo
                           </button>
-                          <div className="mt-2">
-                            <UploadZone
-                              id={`upload-more-${marker}-${p.id}`}
-                              title="Add another photo"
-                              caption="Camera or gallery"
-                              compact
+                          <label
+                            className={`ink-label mt-2 inline-flex cursor-pointer items-center rounded-md border border-border px-3 py-2 uppercase transition-colors hover:bg-muted ${busy === marker ? "pointer-events-none opacity-50" : ""}`}
+                          >
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
                               disabled={busy === marker}
-                              onFile={(f) => upload(f, marker)}
+                              onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                if (f) upload(f, marker);
+                                e.currentTarget.value = "";
+                              }}
                             />
-                          </div>
+                            Add another photo
+                          </label>
                         </div>
                       </div>
 
