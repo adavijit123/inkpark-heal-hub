@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
+import { UploadZone } from "@/components/UploadZone";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -161,15 +162,14 @@ function TattooDetail() {
             ) : (
               <p className="mt-2 text-sm text-muted-foreground">No photo uploaded yet.</p>
             )}
-            <Input
-              type="file"
-              accept="image/*"
-              className="mt-3"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) uploadTattooPhoto(f);
-              }}
-            />
+            <div className="mt-3">
+              <UploadZone
+                id="tattoo-photo"
+                title={photoUrl.data ? "Replace studio photo" : "Upload studio photo"}
+                caption="Camera or gallery"
+                onFile={(f) => uploadTattooPhoto(f)}
+              />
+            </div>
           </section>
 
           <section className="ink-card p-5">
