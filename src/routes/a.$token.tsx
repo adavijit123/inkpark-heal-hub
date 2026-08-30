@@ -157,14 +157,14 @@ function Portal() {
       <section className="mt-8 grid grid-cols-1 gap-3">
         <SectionButton
           active={openSection === "timeline"}
+          index="01"
           title="Healing timeline"
-          subtitle="হিলিং টাইমলাইন · day-by-day care"
           onClick={() => setOpenSection((s) => (s === "timeline" ? null : "timeline"))}
         />
         <SectionButton
           active={openSection === "tracker"}
+          index="02"
           title="Healing photo tracker"
-          subtitle="হিলিং ফটো ট্র্যাকার · upload & feedback"
           onClick={() => setOpenSection((s) => (s === "tracker" ? null : "tracker"))}
         />
       </section>
@@ -173,6 +173,17 @@ function Portal() {
         <section className="mt-8">
           <div className="flex items-baseline justify-between gap-3">
             <h2 className="text-2xl text-foreground">{lang === "bn" ? BN_LABELS.timeline : "Healing timeline"}</h2>
+          </div>
+          <div className="mt-2 flex items-center justify-between gap-3">
+            <button className="ink-label underline" onClick={() => setShowAllStages((v) => !v)}>
+              {showAllStages
+                ? lang === "bn"
+                  ? BN_LABELS.showToday
+                  : "Show today only"
+                : lang === "bn"
+                  ? BN_LABELS.showAll
+                  : "See all stages"}
+            </button>
             <div className="flex items-center gap-1">
               <button
                 className={`ink-label px-2 py-1 ${lang === "en" ? "bg-foreground text-background" : "underline"}`}
@@ -188,15 +199,6 @@ function Portal() {
               </button>
             </div>
           </div>
-          <button className="ink-label mt-2 underline" onClick={() => setShowAllStages((v) => !v)}>
-            {showAllStages
-              ? lang === "bn"
-                ? BN_LABELS.showToday
-                : "Show today only"
-              : lang === "bn"
-                ? BN_LABELS.showAll
-                : "See all stages"}
-          </button>
           {!showAllStages ? (
             <p className="mt-1 text-sm text-muted-foreground">
               {lang === "bn"
@@ -269,27 +271,33 @@ function Portal() {
 
 function SectionButton({
   active,
+  index,
   title,
-  subtitle,
   onClick,
 }: {
   active: boolean;
+  index: string;
   title: string;
-  subtitle: string;
   onClick: () => void;
 }) {
   return (
     <button
       onClick={onClick}
-      className={`ink-card flex w-full items-center justify-between gap-4 p-5 text-left transition-colors ${
+      className={`ink-card group flex w-full items-center justify-between gap-4 p-6 text-left transition-colors ${
         active ? "border-foreground bg-foreground text-background" : ""
       }`}
     >
-      <span>
-        <span className="block text-xl">{title}</span>
-        <span className={`mt-1 block text-xs ${active ? "opacity-70" : "text-muted-foreground"}`}>{subtitle}</span>
+      <span className="flex items-baseline gap-4">
+        <span className={`ink-label text-xs ${active ? "opacity-60" : "text-muted-foreground"}`}>{index}</span>
+        <span className="text-2xl uppercase tracking-[0.14em]">{title}</span>
       </span>
-      <span className="text-2xl leading-none">{active ? "−" : "+"}</span>
+      <span
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-lg leading-none transition-colors ${
+          active ? "border-background/40" : "border-foreground/30"
+        }`}
+      >
+        {active ? "−" : "+"}
+      </span>
     </button>
   );
 }
