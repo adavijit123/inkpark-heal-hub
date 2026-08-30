@@ -418,8 +418,8 @@ function PhotoTracker({
   const [aiBusy, setAiBusy] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
   const visibleDays = showAll
-    ? HEALING_DAYS
-    : HEALING_DAYS.filter((d) => d === currentMarker(day) || photos.some((p) => p.day_marker === d && d > day));
+    ? HEALING_DAYS.filter((d) => d <= day)
+    : HEALING_DAYS.filter((d) => d === currentMarker(day));
 
   const doneDays = HEALING_DAYS.filter((d) => photos.some((p) => p.day_marker === d)).length;
 
@@ -518,12 +518,14 @@ function PhotoTracker({
               : `${doneDays} of ${HEALING_DAYS.length} checkpoints complete`}
         </p>
 
-        <button
-          onClick={() => setShowAll((v) => !v)}
-          className="ink-label mx-auto mt-3 block rounded-full border border-border px-5 py-2.5 transition-colors hover:bg-muted"
-        >
-          {showAll ? "Show today only" : "See all days"}
-        </button>
+        <div className="mt-3 flex justify-center">
+          <button
+            onClick={() => setShowAll((v) => !v)}
+            className="ink-label inline-flex items-center justify-center rounded-full border border-foreground/30 px-4 py-2 tracking-[0.12em] text-muted-foreground transition-all duration-200 hover:border-foreground hover:text-foreground active:scale-[0.98]"
+          >
+            {showAll ? "Show today only" : "See all days"}
+          </button>
+        </div>
       </div>
 
       <div className="mt-4 space-y-3">
