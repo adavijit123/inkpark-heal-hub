@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { UploadZone } from "@/components/UploadZone";
 import { toast } from "sonner";
 import { BN_LABELS, BN_STAGES } from "@/lib/aftercare-bn";
 import { cn } from "@/lib/utils";
@@ -525,18 +526,22 @@ function PhotoTracker({
                 </ul>
               ) : null}
 
-              <Input
-                type="file"
-                accept="image/*"
+              <div className="mt-4">
+                <UploadZone
+                  id={`upload-${marker}`}
+                  title={shots.length ? "Add another photo" : `Day ${marker} photo`}
+                  caption="Camera or gallery"
+                  compact={shots.length > 0}
                   disabled={busy === marker}
-                className="mt-3"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) upload(f, marker);
-                  e.target.value = "";
-                }}
-              />
-              {busy === marker ? <p className="ink-label mt-2">Uploading…</p> : null}
+                  onFile={(f) => upload(f, marker)}
+                />
+              </div>
+              {busy === marker ? (
+                <p className="ink-label mt-3 flex items-center gap-2">
+                  <span className="inline-block size-1.5 animate-pulse rounded-full bg-foreground" />
+                  Uploading…
+                </p>
+              ) : null}
             </div>
           );
         })}
