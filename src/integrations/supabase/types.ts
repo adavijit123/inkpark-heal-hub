@@ -234,6 +234,42 @@ export type Database = {
           },
         ]
       }
+      stage_follows: {
+        Row: {
+          created_at: string
+          id: string
+          stage_id: string
+          tattoo_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          stage_id: string
+          tattoo_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          stage_id?: string
+          tattoo_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stage_follows_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "aftercare_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stage_follows_tattoo_id_fkey"
+            columns: ["tattoo_id"]
+            isOneToOne: false
+            referencedRelation: "tattoos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       studio_settings: {
         Row: {
           booking_url: string | null
