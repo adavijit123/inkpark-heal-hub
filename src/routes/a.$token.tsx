@@ -276,6 +276,66 @@ function SectionButton({
   );
 }
 
+function FollowButton({
+  token,
+  stageId,
+  following,
+  lang,
+  onSaved,
+}: {
+  token: string;
+  stageId: string;
+  following: boolean;
+  lang: "en" | "bn";
+  onSaved: () => void;
+}) {
+  const toggle = useServerFn(toggleStageFollowed);
+  const [busy, setBusy] = useState(false);
+
+  async function onPress() {
+    setBusy(true);
+    try {
+      await toggle({ data: { token, stageId } });
+      onSaved();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't save");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onPress}
+      disabled={busy}
+      aria-pressed={following}
+      className={cn(
+        "ink-label mt-4 flex w-full items-center justify-center gap-2 rounded-full border py-2.5 transition-all duration-200 active:scale-[0.98]",
+        following
+          ? "animate-emoji-pop border-foreground bg-foreground text-background"
+          : "border-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground",
+      )}
+    >
+      <span
+        className={cn(
+          "flex size-4 items-center justify-center rounded-full border text-[10px] leading-none",
+          following ? "border-background/60" : "border-current",
+        )}
+      >
+        {following ? "✓" : ""}
+      </span>
+      {following
+        ? lang === "bn"
+          ? "আমি ধাপগুলো ফলো করছি ✓"
+          : "I'm following these steps"
+        : lang === "bn"
+          ? "আমি ধাপগুলো ফলো করছি"
+          : "Mark as following"}
+    </button>
+  );
+}
+
 function LangToggle({
   lang,
   setLang,
