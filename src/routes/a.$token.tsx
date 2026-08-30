@@ -382,18 +382,13 @@ function PhotoTracker({
 
   return (
     <section className="mt-10">
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-2xl text-foreground">Healing photo tracker</h2>
-        <button className="ink-label underline" onClick={() => setShowAll((v) => !v)}>
-          {showAll ? "Show today only" : "See all days"}
-        </button>
-      </div>
-      <p className="mt-1 text-sm text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         Checkpoints: day 1, 2, 3, 5, 7, 15 and 30. {showAll ? "All checkpoints shown." : `Today you're on day ${day}.`}
       </p>
 
       <div className="ink-card mt-4 overflow-hidden p-5">
-        <div className="flex items-baseline justify-between">
+        <p className="ink-label text-center">Healing Photo Tracker</p>
+        <div className="mt-4 flex items-baseline justify-between">
           <span className="ink-label">Healing Progress</span>
           <span className="font-display text-2xl leading-none tracking-wide text-foreground">
             {Math.round((doneDays / HEALING_DAYS.length) * 100)}%
@@ -448,6 +443,13 @@ function PhotoTracker({
               ? "Day 1 — your healing journey begins"
               : `${doneDays} of ${HEALING_DAYS.length} checkpoints complete`}
         </p>
+
+        <button
+          onClick={() => setShowAll((v) => !v)}
+          className="ink-label mx-auto mt-3 block rounded-full border border-border px-5 py-2.5 transition-colors hover:bg-muted"
+        >
+          {showAll ? "Show today only" : "See all days"}
+        </button>
       </div>
 
       <div className="mt-4 space-y-3">
