@@ -11,6 +11,7 @@ import {
   requestPhotoAiFeedback,
   sendSupport,
   startPortalUpload,
+  toggleStageFollowed,
 } from "@/lib/portal.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -99,7 +100,7 @@ function Portal() {
     );
   }
 
-  const { tattoo, client, artist, stages, photos, settings } = portal.data;
+  const { tattoo, client, artist, stages, photos, settings, followedStages } = portal.data;
   const day = dayCount(tattoo.tattoo_date);
   const currentStage =
     stages.find((s) => day >= s.day_from && (s.day_to === null || day <= s.day_to)) ?? stages[stages.length - 1];
@@ -203,6 +204,13 @@ function Portal() {
                     <Instruction label={lang === "bn" ? BN_LABELS.normal : "Normal"} text={t.normal} />
                     <Instruction label={lang === "bn" ? BN_LABELS.contact : "Call us if"} text={t.contact} />
                   </div>
+                  <FollowButton
+                    token={token}
+                    stageId={s.id}
+                    following={followedStages.includes(s.id)}
+                    lang={lang}
+                    onSaved={() => qc.invalidateQueries({ queryKey: ["portal", token] })}
+                  />
                 </li>
               );
             })}
