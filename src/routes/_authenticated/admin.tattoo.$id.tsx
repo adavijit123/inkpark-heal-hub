@@ -7,6 +7,7 @@ import { AdminShell } from "@/components/AdminShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
@@ -318,6 +319,53 @@ function EditableField({
           toast.success("Updated");
         }}
       />
+    </div>
+  );
+}
+
+function ArtistReply({
+  id,
+  initial,
+  onSaved,
+}: {
+  id: string;
+  initial: string | null;
+  onSaved: () => void;
+}) {
+  const [text, setText] = useState(initial ?? "");
+  const [saving, setSaving] = useState(false);
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={`reply-${id}`} className="ink-label">
+        Artist feedback to client
+      </Label>
+      <Textarea
+        id={`reply-${id}`}
+        rows={3}
+        value={text}
+        placeholder="Looking clean at this stage — keep it light on the balm."
+        onChange={(e) => setText(e.target.value)}
+      />
+      <Button
+        size="sm"
+        disabled={saving}
+        onClick={async () => {
+          setSaving(true);
+          const { error } = await supabase
+            .from("healing_photos")
+            .update({ artist_feedback: text.trim() || null, artist_feedback_at: new Date().toISOString() })
+            .eq("id", id);
+          setSaving(false);
+          if (error) toast.error(error.message);
+          else {
+            toast.success("Feedback sent to the client page");
+            onSaved();
+          }
+        }}
+      >
+        {saving ? "Saving…" : "Save feedback"}
+      </Button>
     </div>
   );
 }
