@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { BN_LABELS, BN_STAGES } from "@/lib/aftercare-bn";
+import { cn } from "@/lib/utils";
 
 
 const HEALING_DAYS = [1, 2, 3, 5, 7, 15, 30];
@@ -413,7 +414,7 @@ function PhotoTracker({
             <div className="relative flex justify-between">
               {HEALING_DAYS.map((m) => {
                 const shot = photos.some((p) => p.day_marker === m);
-                const isCurrent = m === currentMarker;
+                const isCurrent = m === todayMarker;
                 return (
                   <div key={m} className="flex flex-col items-center gap-1.5">
                     <div
@@ -527,8 +528,7 @@ function PhotoTracker({
               <Input
                 type="file"
                 accept="image/*"
-                capture="environment"
-                disabled={busy === marker}
+                  disabled={busy === marker}
                 className="mt-3"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
