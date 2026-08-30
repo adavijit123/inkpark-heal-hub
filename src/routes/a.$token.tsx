@@ -394,19 +394,62 @@ function PhotoTracker({
         Checkpoints: day 1, 2, 3, 5, 7, 15 and 30. {showAll ? "All checkpoints shown." : `Today you're on day ${day}.`}
       </p>
 
-      <div className="ink-card mt-4 p-5">
+      <div className="ink-card mt-4 overflow-hidden p-5">
         <div className="flex items-baseline justify-between">
-          <span className="ink-label">Progress</span>
-          <span className="text-sm text-foreground">
-            {doneDays}/{HEALING_DAYS.length} checkpoints
+          <span className="ink-label">Healing Progress</span>
+          <span className="font-display text-2xl leading-none tracking-wide text-foreground">
+            {Math.round((doneDays / HEALING_DAYS.length) * 100)}%
           </span>
         </div>
-        <div className="mt-3 h-1 w-full bg-border">
-          <div
-            className="h-1 bg-foreground transition-all"
-            style={{ width: `${(doneDays / HEALING_DAYS.length) * 100}%` }}
-          />
+
+        <div className="mt-4">
+          {/* milestone rail */}
+          <div className="relative">
+            <div className="absolute top-1/2 right-0 left-0 h-px -translate-y-1/2 bg-border" />
+            <div
+              className="absolute top-1/2 left-0 h-0.5 -translate-y-1/2 bg-foreground transition-all duration-700 ease-out"
+              style={{ width: `${(doneDays / HEALING_DAYS.length) * 100}%` }}
+            />
+            <div className="relative flex justify-between">
+              {HEALING_DAYS.map((m) => {
+                const shot = photos.some((p) => p.day_marker === m);
+                const isCurrent = m === currentMarker;
+                return (
+                  <div key={m} className="flex flex-col items-center gap-1.5">
+                    <div
+                      className={cn(
+                        "flex size-7 items-center justify-center rounded-full border text-[10px] font-semibold tracking-wider transition-all duration-500",
+                        shot
+                          ? "border-foreground bg-foreground text-background"
+                          : isCurrent
+                            ? "border-foreground bg-background text-foreground ring-4 ring-foreground/10"
+                            : "border-border bg-background text-muted-foreground"
+                      )}
+                    >
+                      {shot ? "✓" : m}
+                    </div>
+                    <span
+                      className={cn(
+                        "text-[9px] tracking-[0.15em] uppercase",
+                        shot || isCurrent ? "text-foreground" : "text-muted-foreground"
+                      )}
+                    >
+                      D{m}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
+
+        <p className="mt-4 border-t border-border pt-3 text-center text-[11px] tracking-[0.2em] text-muted-foreground uppercase">
+          {doneDays === HEALING_DAYS.length
+            ? "Fully healed — congratulations"
+            : doneDays === 0
+              ? "Day 1 — your healing journey begins"
+              : `${doneDays} of ${HEALING_DAYS.length} checkpoints complete`}
+        </p>
       </div>
 
       <div className="mt-4 space-y-2">
