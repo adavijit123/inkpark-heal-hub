@@ -39,6 +39,7 @@ type TrackerPhoto = {
   ai_feedback: string | null;
   ai_status: string;
   artist_feedback: string | null;
+  client_reaction: string | null;
 };
 
 
@@ -382,12 +383,8 @@ function PhotoTracker({
 
   return (
     <section className="mt-10">
-      <p className="text-sm text-muted-foreground">
-        Checkpoints: day 1, 2, 3, 5, 7, 15 and 30. {showAll ? "All checkpoints shown." : `Today you're on day ${day}.`}
-      </p>
-
-      <div className="ink-card mt-4 overflow-hidden p-5">
-        <p className="ink-label text-center">Healing Photo Tracker</p>
+      <div className="ink-card overflow-hidden p-5">
+        <h2 className="text-center text-2xl text-foreground">Healing Photo Tracker</h2>
         <div className="mt-4 flex items-baseline justify-between">
           <span className="ink-label">Healing Progress</span>
           <span className="font-display text-2xl leading-none tracking-wide text-foreground">
