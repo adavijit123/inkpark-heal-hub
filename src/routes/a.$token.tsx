@@ -318,7 +318,7 @@ function FollowButton({
       disabled={busy}
       aria-pressed={following}
       className={cn(
-        "ink-label mt-4 inline-flex items-center justify-center gap-2 rounded-full border px-4 py-2 tracking-[0.12em] transition-all duration-200 active:scale-[0.98]",
+        "ink-label inline-flex items-center justify-center gap-2 rounded-full border px-4 py-2 tracking-[0.12em] transition-all duration-200 active:scale-[0.98]",
         following
           ? "animate-emoji-pop border-foreground bg-foreground text-background"
           : "border-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground",
