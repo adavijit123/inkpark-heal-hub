@@ -27,7 +27,12 @@ export type PortalHealingPhoto = {
   note: string | null;
   created_at: string;
   url: string | null;
+  ai_feedback: string | null;
+  ai_status: string;
+  artist_feedback: string | null;
+  artist_feedback_at: string | null;
 };
+
 
 export type PortalData = {
   tattoo: {
