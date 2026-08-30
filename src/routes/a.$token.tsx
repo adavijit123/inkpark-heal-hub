@@ -18,7 +18,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
-const HEALING_DAYS = [1, 2, 3, 5, 7, 10, 14, 21, 30];
+const HEALING_DAYS = [1, 2, 3, 5, 7, 15, 30];
+
+function currentMarker(day: number) {
+  const due = HEALING_DAYS.filter((d) => d <= day);
+  return due.length ? due[due.length - 1] : HEALING_DAYS[0];
+}
+
+function nextMarker(day: number) {
+  return HEALING_DAYS.find((d) => d > day) ?? null;
+}
 
 type TrackerPhoto = {
   id: string;
