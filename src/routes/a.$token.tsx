@@ -174,31 +174,15 @@ function Portal() {
           <div className="flex items-baseline justify-between gap-3">
             <h2 className="text-2xl text-foreground">{lang === "bn" ? BN_LABELS.timeline : "Healing timeline"}</h2>
           </div>
-          <div className="mt-2 flex items-center justify-between gap-3">
-            <button className="ink-label underline" onClick={() => setShowAllStages((v) => !v)}>
-              {showAllStages
-                ? lang === "bn"
-                  ? BN_LABELS.showToday
-                  : "Show today only"
-                : lang === "bn"
-                  ? BN_LABELS.showAll
-                  : "See all stages"}
-            </button>
-            <div className="flex items-center gap-1">
-              <button
-                className={`ink-label px-2 py-1 ${lang === "en" ? "bg-foreground text-background" : "underline"}`}
-                onClick={() => setLang("en")}
-              >
-                EN
-              </button>
-              <button
-                className={`ink-label px-2 py-1 ${lang === "bn" ? "bg-foreground text-background" : "underline"}`}
-                onClick={() => setLang("bn")}
-              >
-                বাংলা
-              </button>
-            </div>
-          </div>
+          <button className="ink-label mt-2 underline" onClick={() => setShowAllStages((v) => !v)}>
+            {showAllStages
+              ? lang === "bn"
+                ? BN_LABELS.showToday
+                : "Show today only"
+              : lang === "bn"
+                ? BN_LABELS.showAll
+                : "See all stages"}
+          </button>
           {!showAllStages ? (
             <p className="mt-1 text-sm text-muted-foreground">
               {lang === "bn"
@@ -225,9 +209,13 @@ function Portal() {
                     : "soon";
               return (
                 <li key={s.id} className={`ink-card p-5 ${active ? "border-foreground" : ""}`}>
-                  <div className="flex items-baseline justify-between gap-3">
+                  <div className="flex items-center justify-between gap-3">
                     <h3 className="text-xl text-foreground">{t.title}</h3>
-                    <span className="ink-label shrink-0">{state}</span>
+                    {showAllStages ? (
+                      <span className="ink-label shrink-0">{state}</span>
+                    ) : (
+                      <LangToggle lang={lang} setLang={setLang} />
+                    )}
                   </div>
                   {t.subtitle ? <p className="mt-1 text-sm text-muted-foreground">{t.subtitle}</p> : null}
                   <div className="mt-4 space-y-3 text-sm text-foreground">
@@ -299,6 +287,32 @@ function SectionButton({
         {active ? "−" : "+"}
       </span>
     </button>
+  );
+}
+
+function LangToggle({
+  lang,
+  setLang,
+}: {
+  lang: "en" | "bn";
+  setLang: (l: "en" | "bn") => void;
+}) {
+  const base = "ink-label rounded-full px-3 py-1.5 transition-colors";
+  return (
+    <div className="flex shrink-0 items-center rounded-full border border-foreground/30 p-1">
+      <button
+        onClick={() => setLang("en")}
+        className={`${base} ${lang === "en" ? "bg-foreground text-background" : "text-muted-foreground"}`}
+      >
+        English
+      </button>
+      <button
+        onClick={() => setLang("bn")}
+        className={`${base} ${lang === "bn" ? "bg-foreground text-background" : "text-muted-foreground"}`}
+      >
+        বাংলা
+      </button>
+    </div>
   );
 }
 
