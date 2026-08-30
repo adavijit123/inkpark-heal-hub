@@ -128,9 +128,20 @@ function Portal() {
       </dl>
 
       <section className="mt-10">
-        <h2 className="text-2xl text-foreground">Healing timeline</h2>
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="text-2xl text-foreground">Healing timeline</h2>
+          <button className="ink-label underline" onClick={() => setShowAllStages((v) => !v)}>
+            {showAllStages ? "Show today only" : "See all stages"}
+          </button>
+        </div>
+        {!showAllStages ? (
+          <p className="mt-1 text-sm text-muted-foreground">
+            Showing today's care only — day {day}
+            {nextDay ? ` · next checkpoint day ${nextDay}` : ""}.
+          </p>
+        ) : null}
         <ol className="mt-4 space-y-3">
-          {stages.map((s) => {
+          {(showAllStages ? stages : stages.filter((s) => s.id === currentStage?.id)).map((s) => {
             const active = currentStage?.id === s.id;
             const done = s.day_to !== null && day > s.day_to;
             return (
