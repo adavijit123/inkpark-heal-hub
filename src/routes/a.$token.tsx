@@ -17,6 +17,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { BN_LABELS, BN_STAGES } from "@/lib/aftercare-bn";
+
 
 const HEALING_DAYS = [1, 2, 3, 5, 7, 15, 30];
 
