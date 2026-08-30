@@ -1,0 +1,306 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import QRCode from "qrcode";
+import { supabase } from "@/integrations/supabase/client";
+import { AdminShell } from "@/components/AdminShell";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
+
+export const Route = createFileRoute("/_authenticated/admin/tattoo/$id")({
+  head: () => ({
+    meta: [
+      { title: "Session Record — InkPark Aftercare" },
+      { name: "description", content: "Manage a tattoo session, its client link, healing photos and reminders." },
+      { property: "og:title", content: "Session Record — InkPark Aftercare" },
+      { property: "og:description", content: "Manage a tattoo session, its client link, healing photos and reminders." },
+    ],
+  }),
+  component: TattooDetail,
+});
+
+function TattooDetail() {
+  const { id } = Route.useParams();
+  const qc = useQueryClient();
+  const [qr, setQr] = useState<string | null>(null);
+
+  const tattoo = useQuery({
+    queryKey: ["tattoo", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tattoos")
+        .select(
+          "id, tattoo_date, style, placement, photo_path, access_token, review_submitted, rebooking_requested, clients(full_name, phone), artists(name)",
+        )
+        .eq("id", id)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const photoUrl = useQuery({
+    queryKey: ["tattoo-photo", tattoo.data?.photo_path],
+    enabled: Boolean(tattoo.data?.photo_path),
+    queryFn: async () => {
+      const { data } = await supabase.storage
+        .from("tattoo-photos")
+        .createSignedUrl(tattoo.data!.photo_path!, 3600);
+      return data?.signedUrl ?? null;
+    },
+  });
+
+  const healing = useQuery({
+    queryKey: ["healing", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("healing_photos")
+        .select("id, day_marker, storage_path, created_at")
+        .eq("tattoo_id", id)
+        .order("day_marker");
+      if (error) throw error;
+      const signed = await Promise.all(
+        data.map(async (p) => {
+          const { data: s } = await supabase.storage.from("healing-photos").createSignedUrl(p.storage_path, 3600);
+          return { ...p, url: s?.signedUrl ?? null };
+        }),
+      );
+      return signed;
+    },
+  });
+
+  const messages = useQuery({
+    queryKey: ["support", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("support_messages")
+        .select("id, message, created_at, handled")
+        .eq("tattoo_id", id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const reminders = useQuery({
+    queryKey: ["reminders", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("reminders")
+        .select("id, day_marker, scheduled_for, sent_at, enabled")
+        .eq("tattoo_id", id)
+        .order("day_marker");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const link =
+    typeof window !== "undefined" && tattoo.data
+      ? `${window.location.origin}/a/${tattoo.data.access_token}`
+      : "";
+
+  useEffect(() => {
+    if (!link) return;
+    QRCode.toDataURL(link, { margin: 1, width: 480, color: { dark: "#111111", light: "#ffffff" } })
+      .then(setQr)
+      .catch(() => setQr(null));
+  }, [link]);
+
+  async function uploadTattooPhoto(file: File) {
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+    const path = `${id}/main-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("tattoo-photos").upload(path, file);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    await supabase.from("tattoos").update({ photo_path: path }).eq("id", id);
+    toast.success("Photo added");
+    qc.invalidateQueries({ queryKey: ["tattoo", id] });
+  }
+
+  const t = tattoo.data;
+
+  return (
+    <AdminShell title="Session" back={{ to: "/admin", label: "← Back to dashboard" }}>
+      {!t ? (
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      ) : (
+        <div className="space-y-6">
+          <section className="ink-card p-5">
+            <p className="ink-label">Client</p>
+            <h2 className="mt-1 text-2xl text-foreground">
+              {(t.clients as { full_name: string } | null)?.full_name}
+            </h2>
+            <dl className="mt-4 grid grid-cols-2 gap-4 text-sm">
+              <Field label="Date" value={t.tattoo_date} />
+              <Field label="Artist" value={(t.artists as { name: string } | null)?.name ?? "—"} />
+              <Field label="Style" value={t.style ?? "—"} />
+              <Field label="Placement" value={t.placement ?? "—"} />
+            </dl>
+            <div className="mt-5 space-y-3">
+              <EditableField id={id} field="style" label="Style" value={t.style} qc={qc} />
+              <EditableField id={id} field="placement" label="Placement" value={t.placement} qc={qc} />
+            </div>
+          </section>
+
+          <section className="ink-card p-5">
+            <p className="ink-label">Tattoo photo</p>
+            {photoUrl.data ? (
+              <img
+                src={photoUrl.data}
+                alt="Studio photo of the finished tattoo"
+                className="mt-3 w-full rounded-md object-cover"
+              />
+            ) : (
+              <p className="mt-2 text-sm text-muted-foreground">No photo uploaded yet.</p>
+            )}
+            <Input
+              type="file"
+              accept="image/*"
+              className="mt-3"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) uploadTattooPhoto(f);
+              }}
+            />
+          </section>
+
+          <section className="ink-card p-5">
+            <p className="ink-label">Client aftercare link</p>
+            {qr ? <img src={qr} alt="QR code for the client aftercare page" className="mt-3 w-40" /> : null}
+            <p className="mt-3 break-all text-xs text-muted-foreground">{link}</p>
+            <div className="mt-3 flex gap-2">
+              <Button
+                size="sm"
+                onClick={() => {
+                  navigator.clipboard.writeText(link);
+                  toast.success("Link copied");
+                }}
+              >
+                Copy link
+              </Button>
+              {qr ? (
+                <Button size="sm" variant="outline" asChild>
+                  <a href={qr} download={`inkpark-qr-${id.slice(0, 6)}.png`}>
+                    Download QR
+                  </a>
+                </Button>
+              ) : null}
+            </div>
+          </section>
+
+          <section className="ink-card p-5">
+            <p className="ink-label">Healing photos</p>
+            {(healing.data ?? []).length === 0 ? (
+              <p className="mt-2 text-sm text-muted-foreground">Client hasn't uploaded any yet.</p>
+            ) : (
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                {(healing.data ?? []).map((p) => (
+                  <figure key={p.id}>
+                    {p.url ? (
+                      <img src={p.url} alt={`Healing photo day ${p.day_marker}`} className="aspect-square w-full rounded-md object-cover" />
+                    ) : null}
+                    <figcaption className="ink-label mt-1">Day {p.day_marker}</figcaption>
+                  </figure>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className="ink-card p-5">
+            <p className="ink-label">Reminders</p>
+            <div className="mt-3 divide-y divide-border">
+              {(reminders.data ?? []).map((r) => (
+                <div key={r.id} className="flex items-center justify-between py-3">
+                  <div>
+                    <p className="text-sm text-foreground">Day {r.day_marker}</p>
+                    <p className="ink-label mt-1">
+                      {r.scheduled_for} · {r.sent_at ? "sent" : "pending"}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={r.enabled}
+                    onCheckedChange={async (v) => {
+                      await supabase.from("reminders").update({ enabled: v }).eq("id", r.id);
+                      qc.invalidateQueries({ queryKey: ["reminders", id] });
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="ink-card p-5">
+            <p className="ink-label">Client messages</p>
+            {(messages.data ?? []).length === 0 ? (
+              <p className="mt-2 text-sm text-muted-foreground">No messages.</p>
+            ) : (
+              <ul className="mt-3 space-y-3">
+                {(messages.data ?? []).map((m) => (
+                  <li key={m.id} className="border-l-2 border-border pl-3">
+                    <p className="text-sm text-foreground">{m.message}</p>
+                    <p className="ink-label mt-1">{new Date(m.created_at).toLocaleString()}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section className="ink-card p-5">
+            <p className="ink-label">Review &amp; rebooking</p>
+            <p className="mt-2 text-sm text-foreground">
+              Review: {t.review_submitted ? "opened ★" : "not yet"}
+            </p>
+            <p className="mt-1 text-sm text-foreground">
+              Rebooking: {t.rebooking_requested ? "requested ↻" : "not yet"}
+            </p>
+          </section>
+        </div>
+      )}
+    </AdminShell>
+  );
+}
+
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="ink-label">{label}</dt>
+      <dd className="mt-1 text-sm text-foreground">{value}</dd>
+    </div>
+  );
+}
+
+function EditableField({
+  id,
+  field,
+  label,
+  value,
+  qc,
+}: {
+  id: string;
+  field: "style" | "placement";
+  label: string;
+  value: string | null;
+  qc: ReturnType<typeof useQueryClient>;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <Input
+        defaultValue={value ?? ""}
+        onBlur={async (e) => {
+          if (e.target.value === (value ?? "")) return;
+          const patch = field === "style" ? { style: e.target.value } : { placement: e.target.value };
+          await supabase.from("tattoos").update(patch).eq("id", id);
+          qc.invalidateQueries({ queryKey: ["tattoo", id] });
+          toast.success("Updated");
+        }}
+      />
+    </div>
+  );
+}
