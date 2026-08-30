@@ -80,7 +80,7 @@ async function signed(bucket: string, path: string | null) {
 export async function loadPortal(token: string): Promise<PortalData> {
   const tattoo = await resolveTattoo(token);
 
-  const [clientRes, artistRes, stagesRes, photosRes, settingsRes] = await Promise.all([
+  const [clientRes, artistRes, stagesRes, photosRes, settingsRes, followsRes] = await Promise.all([
     supabaseAdmin.from("clients").select("full_name").eq("id", tattoo.client_id).maybeSingle(),
     tattoo.artist_id
       ? supabaseAdmin.from("artists").select("name, instagram").eq("id", tattoo.artist_id).maybeSingle()
@@ -98,6 +98,7 @@ export async function loadPortal(token: string): Promise<PortalData> {
       .from("studio_settings")
       .select("whatsapp_number, contact_email, review_url, booking_url")
       .maybeSingle(),
+    supabaseAdmin.from("stage_follows").select("stage_id").eq("tattoo_id", tattoo.id),
   ]);
 
   const photos = await Promise.all(
