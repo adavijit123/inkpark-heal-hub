@@ -61,6 +61,17 @@ export const markPortalStep = createServerFn({ method: "POST" })
     return markPortalAction(data.token, data.action);
   });
 
+export const reactToArtistFeedback = createServerFn({ method: "POST" })
+  .inputValidator((d: { token: string; photoId: string; reaction: string }) => ({
+    token: String(d.token ?? ""),
+    photoId: String(d.photoId ?? ""),
+    reaction: String(d.reaction ?? ""),
+  }))
+  .handler(async ({ data }) => {
+    const { saveClientReaction } = await import("./portal.server");
+    return saveClientReaction(data.token, data.photoId, data.reaction);
+  });
+
 export const requestPhotoAiFeedback = createServerFn({ method: "POST" })
   .inputValidator((d: { token: string; photoId: string }) => ({
     token: String(d.token ?? ""),

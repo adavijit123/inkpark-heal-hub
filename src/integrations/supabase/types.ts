@@ -131,6 +131,7 @@ export type Database = {
           ai_status: string
           artist_feedback: string | null
           artist_feedback_at: string | null
+          client_reaction: string | null
           created_at: string
           day_marker: number
           id: string
@@ -143,6 +144,7 @@ export type Database = {
           ai_status?: string
           artist_feedback?: string | null
           artist_feedback_at?: string | null
+          client_reaction?: string | null
           created_at?: string
           day_marker: number
           id?: string
@@ -155,6 +157,7 @@ export type Database = {
           ai_status?: string
           artist_feedback?: string | null
           artist_feedback_at?: string | null
+          client_reaction?: string | null
           created_at?: string
           day_marker?: number
           id?: string

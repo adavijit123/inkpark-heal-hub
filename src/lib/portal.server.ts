@@ -162,6 +162,19 @@ export async function saveHealingPhoto(
   return { ok: true };
 }
 
+export async function saveClientReaction(token: string, photoId: string, reaction: string) {
+  const tattoo = await resolveTattoo(token);
+  const allowed = ["❤️", "😊", "👍", "😢", "😟"];
+  if (!allowed.includes(reaction)) fail("Unknown reaction");
+  const { error } = await supabaseAdmin
+    .from("healing_photos")
+    .update({ client_reaction: reaction })
+    .eq("id", photoId)
+    .eq("tattoo_id", tattoo.id);
+  if (error) fail(error.message);
+  return { ok: true };
+}
+
 export async function deleteHealingPhoto(token: string, photoId: string) {
   const tattoo = await resolveTattoo(token);
   const { data } = await supabaseAdmin
