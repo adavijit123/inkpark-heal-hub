@@ -296,10 +296,14 @@ function PhotoTracker({
 
   return (
     <section className="mt-10">
-      <h2 className="text-2xl text-foreground">Healing photo tracker</h2>
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="text-2xl text-foreground">Healing photo tracker</h2>
+        <button className="ink-label underline" onClick={() => setShowAll((v) => !v)}>
+          {showAll ? "Show today only" : "See all days"}
+        </button>
+      </div>
       <p className="mt-1 text-sm text-muted-foreground">
-        Day 1 to day 30. Upload a photo at each checkpoint — AI gives you an instant healing check and your artist can
-        reply personally.
+        Checkpoints: day 1, 2, 3, 5, 7, 15 and 30. {showAll ? "All checkpoints shown." : `Today you're on day ${day}.`}
       </p>
 
       <div className="ink-card mt-4 p-5">
