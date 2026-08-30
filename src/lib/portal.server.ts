@@ -31,6 +31,7 @@ export type PortalHealingPhoto = {
   ai_status: string;
   artist_feedback: string | null;
   artist_feedback_at: string | null;
+  client_reaction: string | null;
 };
 
 
