@@ -103,7 +103,10 @@ function Sessions() {
   });
 
   async function create() {
-    if (!clientId) return toast.error("Pick a client first");
+    if (!clientId) {
+      toast.error("Pick a client first");
+      return;
+    }
     const { error } = await supabase.from("tattoos").insert({
       client_id: clientId,
       artist_id: artistId || null,
@@ -111,7 +114,10 @@ function Sessions() {
       style: style || null,
       placement: placement || null,
     });
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Session created — reminders scheduled");
     setOpen(false);
     setStyle("");
@@ -226,11 +232,17 @@ function Clients() {
   });
 
   async function add() {
-    if (!name.trim()) return toast.error("Name required");
+    if (!name.trim()) {
+      toast.error("Name required");
+      return;
+    }
     const { error } = await supabase
       .from("clients")
       .insert({ full_name: name.trim(), phone: phone || null, email: email || null });
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     setName("");
     setPhone("");
     setEmail("");
@@ -241,7 +253,10 @@ function Clients() {
 
   async function toggleConsent(id: string, value: boolean) {
     const { error } = await supabase.from("clients").update({ photo_sharing_consent: value }).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     qc.invalidateQueries({ queryKey: ["clients-full"] });
   }
 
@@ -299,9 +314,15 @@ function Artists() {
   });
 
   async function add() {
-    if (!name.trim()) return toast.error("Name required");
+    if (!name.trim()) {
+      toast.error("Name required");
+      return;
+    }
     const { error } = await supabase.from("artists").insert({ name: name.trim(), instagram: instagram || null });
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     setName("");
     setInstagram("");
     qc.invalidateQueries({ queryKey: ["artists-full"] });
@@ -364,8 +385,11 @@ function CareEditor() {
   });
 
   async function save(id: string, patch: Record<string, string>) {
-    const { error } = await supabase.from("aftercare_stages").update(patch).eq("id", id);
-    if (error) return toast.error(error.message);
+    const { error } = await supabase.from("aftercare_stages").update(patch as never).eq("id", id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Instructions updated");
     qc.invalidateQueries({ queryKey: ["stages"] });
   }
@@ -415,8 +439,11 @@ function Settings() {
   });
 
   async function save(patch: Record<string, string>) {
-    const { error } = await supabase.from("studio_settings").update(patch).eq("id", true);
-    if (error) return toast.error(error.message);
+    const { error } = await supabase.from("studio_settings").update(patch as never).eq("id", true);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Saved");
     qc.invalidateQueries({ queryKey: ["settings"] });
   }
