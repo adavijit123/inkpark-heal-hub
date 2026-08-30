@@ -196,22 +196,38 @@ function TattooDetail() {
           </section>
 
           <section className="ink-card p-5">
-            <p className="ink-label">Healing photos</p>
+            <p className="ink-label">Healing photos &amp; feedback</p>
             {(healing.data ?? []).length === 0 ? (
               <p className="mt-2 text-sm text-muted-foreground">Client hasn't uploaded any yet.</p>
             ) : (
-              <div className="mt-3 grid grid-cols-3 gap-2">
+              <ul className="mt-3 space-y-5">
                 {(healing.data ?? []).map((p) => (
-                  <figure key={p.id}>
-                    {p.url ? (
-                      <img src={p.url} alt={`Healing photo day ${p.day_marker}`} className="aspect-square w-full rounded-md object-cover" />
-                    ) : null}
-                    <figcaption className="ink-label mt-1">Day {p.day_marker}</figcaption>
-                  </figure>
+                  <li key={p.id} className="space-y-3 border-t border-border pt-4 first:border-0 first:pt-0">
+                    <div className="flex gap-3">
+                      {p.url ? (
+                        <img
+                          src={p.url}
+                          alt={`Healing photo day ${p.day_marker}`}
+                          className="h-24 w-24 shrink-0 rounded-md object-cover"
+                        />
+                      ) : null}
+                      <div className="min-w-0">
+                        <p className="text-sm text-foreground">Day {p.day_marker}</p>
+                        {p.note ? <p className="mt-1 text-sm text-muted-foreground">“{p.note}”</p> : null}
+                        {p.ai_feedback ? (
+                          <p className="mt-2 whitespace-pre-line text-xs text-muted-foreground">
+                            AI: {p.ai_feedback}
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+                    <ArtistReply id={p.id} initial={p.artist_feedback} onSaved={() => qc.invalidateQueries({ queryKey: ["healing", id] })} />
+                  </li>
                 ))}
-              </div>
+              </ul>
             )}
           </section>
+
 
           <section className="ink-card p-5">
             <p className="ink-label">Reminders</p>
