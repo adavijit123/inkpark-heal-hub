@@ -7,6 +7,7 @@ import {
   getPortal,
   markPortalStep,
   removeHealingPhoto,
+  reactToArtistFeedback,
   requestPhotoAiFeedback,
   sendSupport,
   startPortalUpload,
@@ -39,6 +40,7 @@ type TrackerPhoto = {
   ai_feedback: string | null;
   ai_status: string;
   artist_feedback: string | null;
+  client_reaction: string | null;
 };
 
 
@@ -335,6 +337,7 @@ function PhotoTracker({
   const startUpload = useServerFn(startPortalUpload);
   const save = useServerFn(addHealingPhoto);
   const remove = useServerFn(removeHealingPhoto);
+  const react = useServerFn(reactToArtistFeedback);
   const askAi = useServerFn(requestPhotoAiFeedback);
   const [busy, setBusy] = useState<number | null>(null);
   const [aiBusy, setAiBusy] = useState<string | null>(null);
@@ -382,12 +385,8 @@ function PhotoTracker({
 
   return (
     <section className="mt-10">
-      <p className="text-sm text-muted-foreground">
-        Checkpoints: day 1, 2, 3, 5, 7, 15 and 30. {showAll ? "All checkpoints shown." : `Today you're on day ${day}.`}
-      </p>
-
-      <div className="ink-card mt-4 overflow-hidden p-5">
-        <p className="ink-label text-center">Healing Photo Tracker</p>
+      <div className="ink-card overflow-hidden p-5">
+        <h2 className="text-center text-2xl text-foreground">Healing Photo Tracker</h2>
         <div className="mt-4 flex items-baseline justify-between">
           <span className="ink-label">Healing Progress</span>
           <span className="font-display text-2xl leading-none tracking-wide text-foreground">
@@ -529,6 +528,35 @@ function PhotoTracker({
                         <p className="mt-2 text-sm text-foreground">
                           {p.artist_feedback ?? "Your artist hasn't replied to this photo yet."}
                         </p>
+                        {p.artist_feedback ? (
+                          <div className="mt-3 border-t border-border pt-3">
+                            <p className="ink-label">How does this make you feel?</p>
+                            <div className="mt-2 flex gap-2">
+                              {["❤️", "😊", "👍", "😢", "😟"].map((emoji) => (
+                                <button
+                                  key={emoji}
+                                  aria-label={`React with ${emoji}`}
+                                  onClick={async () => {
+                                    try {
+                                      await react({ data: { token, photoId: p.id, reaction: emoji } });
+                                      qc.invalidateQueries({ queryKey: ["portal", token] });
+                                    } catch (e) {
+                                      toast.error(e instanceof Error ? e.message : "Couldn't save reaction");
+                                    }
+                                  }}
+                                  className={cn(
+                                    "flex size-9 items-center justify-center rounded-full border text-lg transition-all",
+                                    p.client_reaction === emoji
+                                      ? "scale-110 border-foreground bg-foreground/10"
+                                      : "border-border hover:border-foreground/50"
+                                  )}
+                                >
+                                  {emoji}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ) : null}
                       </div>
                     </li>
                   ))}

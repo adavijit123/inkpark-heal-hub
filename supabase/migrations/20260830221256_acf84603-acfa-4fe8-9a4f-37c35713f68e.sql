@@ -1,0 +1,1 @@
+ALTER TABLE public.healing_photos ADD COLUMN IF NOT EXISTS client_reaction text;

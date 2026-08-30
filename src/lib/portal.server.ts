@@ -31,6 +31,7 @@ export type PortalHealingPhoto = {
   ai_status: string;
   artist_feedback: string | null;
   artist_feedback_at: string | null;
+  client_reaction: string | null;
 };
 
 
@@ -89,7 +90,7 @@ export async function loadPortal(token: string): Promise<PortalData> {
       .order("sort_order"),
     supabaseAdmin
       .from("healing_photos")
-      .select("id, day_marker, note, created_at, storage_path, ai_feedback, ai_status, artist_feedback, artist_feedback_at")
+      .select("id, day_marker, note, created_at, storage_path, ai_feedback, ai_status, artist_feedback, artist_feedback_at, client_reaction")
       .eq("tattoo_id", tattoo.id)
       .order("day_marker"),
     supabaseAdmin
@@ -109,6 +110,7 @@ export async function loadPortal(token: string): Promise<PortalData> {
       ai_status: p.ai_status,
       artist_feedback: p.artist_feedback,
       artist_feedback_at: p.artist_feedback_at,
+      client_reaction: p.client_reaction,
     })),
   );
 
@@ -157,6 +159,19 @@ export async function saveHealingPhoto(
   const { error } = await supabaseAdmin
     .from("healing_photos")
     .insert({ tattoo_id: tattoo.id, day_marker: dayMarker, storage_path: storagePath, note });
+  if (error) fail(error.message);
+  return { ok: true };
+}
+
+export async function saveClientReaction(token: string, photoId: string, reaction: string) {
+  const tattoo = await resolveTattoo(token);
+  const allowed = ["❤️", "😊", "👍", "😢", "😟"];
+  if (!allowed.includes(reaction)) fail("Unknown reaction");
+  const { error } = await supabaseAdmin
+    .from("healing_photos")
+    .update({ client_reaction: reaction })
+    .eq("id", photoId)
+    .eq("tattoo_id", tattoo.id);
   if (error) fail(error.message);
   return { ok: true };
 }
