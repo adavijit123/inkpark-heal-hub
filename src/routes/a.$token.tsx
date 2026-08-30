@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import {
   addHealingPhoto,
   getPortal,
@@ -649,7 +649,7 @@ function ReactionBar({
                     "--dx": `${i * 22}px`,
                     "--dy": `${-30 - Math.abs(i) * 10 - (idx % 2 === 0 ? 8 : 0)}px`,
                     animationDelay: `${idx * 60}ms`,
-                  } as React.CSSProperties
+                  } as CSSProperties
                 }
               >
                 {burst.emoji}
