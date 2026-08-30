@@ -78,6 +78,9 @@ function Portal() {
     retry: false,
   });
   const [showAllStages, setShowAllStages] = useState(false);
+  const [openSection, setOpenSection] = useState<"timeline" | "tracker" | null>(null);
+  const [lang, setLang] = useState<"en" | "bn">("en");
+
 
   if (portal.isPending) {
     return <Centered>Loading your aftercare…</Centered>;
