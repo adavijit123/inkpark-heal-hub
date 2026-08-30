@@ -1,6 +1,6 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-export const HEALING_DAYS = [1, 3, 7, 14, 30] as const;
+export const HEALING_DAYS = [1, 2, 3, 5, 7, 10, 14, 21, 30] as const;
 const SIGNED_TTL = 60 * 60;
 
 function fail(message: string): never {
@@ -193,4 +193,64 @@ export async function markPortalAction(token: string, action: "review" | "rebook
   const { error } = await supabaseAdmin.from("tattoos").update(patch).eq("id", tattoo.id);
   if (error) fail(error.message);
   return { ok: true };
+}
+
+export async function requestAiFeedback(token: string, photoId: string) {
+  const tattoo = await resolveTattoo(token);
+  const { data: photo } = await supabaseAdmin
+    .from("healing_photos")
+    .select("id, day_marker, note, storage_path")
+    .eq("id", photoId)
+    .eq("tattoo_id", tattoo.id)
+    .maybeSingle();
+  if (!photo) fail("Photo not found");
+
+  const file = await supabaseAdmin.storage.from("healing-photos").download(photo.storage_path);
+  if (file.error || !file.data) fail("Could not read the photo");
+  const buf = Buffer.from(await file.data.arrayBuffer());
+  const dataUrl = `data:${file.data.type || "image/jpeg"};base64,${buf.toString("base64")}`;
+
+  const apiKey = process.env["LOVABLE_API_KEY"];
+  if (!apiKey) fail("AI feedback is not configured");
+
+  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a tattoo aftercare assistant for a studio. Look at the healing photo and give short, calm, practical feedback in 3 lines max: (1) how the healing looks at this stage, (2) one concrete care tip for the next few days, (3) whether anything looks like it needs the artist or a doctor. Never diagnose medically; if you see strong redness, pus, swelling or spreading rash, tell them to contact the studio and a doctor. No markdown.",
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `This is day ${photo.day_marker} of healing. Client note: ${photo.note ?? "none"}.`,
+            },
+            { type: "image_url", image_url: { url: dataUrl } },
+          ],
+        },
+      ],
+    }),
+  });
+
+  if (res.status === 429) fail("AI is busy right now, please try again in a minute.");
+  if (res.status === 402) fail("AI credits are exhausted for this studio.");
+  if (!res.ok) fail("AI feedback failed, please try again.");
+
+  const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+  const text = json.choices?.[0]?.message?.content?.trim();
+  if (!text) fail("AI returned no feedback");
+
+  await supabaseAdmin
+    .from("healing_photos")
+    .update({ ai_feedback: text, ai_status: "done" })
+    .eq("id", photo.id)
+    .eq("tattoo_id", tattoo.id);
+
+  return { ok: true, feedback: text };
 }
