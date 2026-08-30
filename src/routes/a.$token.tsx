@@ -17,6 +17,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { BN_LABELS, BN_STAGES } from "@/lib/aftercare-bn";
+
 
 const HEALING_DAYS = [1, 2, 3, 5, 7, 15, 30];
 
@@ -76,6 +78,9 @@ function Portal() {
     retry: false,
   });
   const [showAllStages, setShowAllStages] = useState(false);
+  const [openSection, setOpenSection] = useState<"timeline" | "tracker" | null>(null);
+  const [lang, setLang] = useState<"en" | "bn">("en");
+
 
   if (portal.isPending) {
     return <Centered>Loading your aftercare…</Centered>;
@@ -149,44 +154,96 @@ function Portal() {
         <Meta label="Placement" value={tattoo.placement ?? "—"} />
       </dl>
 
-      <section className="mt-10">
-        <div className="flex items-baseline justify-between gap-3">
-          <h2 className="text-2xl text-foreground">Healing timeline</h2>
-          <button className="ink-label underline" onClick={() => setShowAllStages((v) => !v)}>
-            {showAllStages ? "Show today only" : "See all stages"}
-          </button>
-        </div>
-        {!showAllStages ? (
-          <p className="mt-1 text-sm text-muted-foreground">
-            Showing today's care only — day {day}
-            {nextDay ? ` · next checkpoint day ${nextDay}` : ""}.
-          </p>
-        ) : null}
-        <ol className="mt-4 space-y-3">
-          {(showAllStages ? stages : stages.filter((s) => s.id === currentStage?.id)).map((s) => {
-            const active = currentStage?.id === s.id;
-            const done = s.day_to !== null && day > s.day_to;
-            return (
-              <li key={s.id} className={`ink-card p-5 ${active ? "border-foreground" : ""}`}>
-                <div className="flex items-baseline justify-between gap-3">
-                  <h3 className="text-xl text-foreground">{s.title}</h3>
-                  <span className="ink-label shrink-0">{done ? "done" : active ? "now" : "soon"}</span>
-                </div>
-                {s.subtitle ? <p className="mt-1 text-sm text-muted-foreground">{s.subtitle}</p> : null}
-                <div className="mt-4 space-y-3 text-sm text-foreground">
-                  <Instruction label="Clean" text={s.cleaning} />
-                  <Instruction label="Moisturize" text={s.moisturizing} />
-                  <Instruction label="Avoid" text={s.avoid} />
-                  <Instruction label="Normal" text={s.normal} />
-                  <Instruction label="Call us if" text={s.contact} />
-                </div>
-              </li>
-            );
-          })}
-        </ol>
+      <section className="mt-8 grid grid-cols-1 gap-3">
+        <SectionButton
+          active={openSection === "timeline"}
+          title="Healing timeline"
+          subtitle="হিলিং টাইমলাইন · day-by-day care"
+          onClick={() => setOpenSection((s) => (s === "timeline" ? null : "timeline"))}
+        />
+        <SectionButton
+          active={openSection === "tracker"}
+          title="Healing photo tracker"
+          subtitle="হিলিং ফটো ট্র্যাকার · upload & feedback"
+          onClick={() => setOpenSection((s) => (s === "tracker" ? null : "tracker"))}
+        />
       </section>
 
-      <PhotoTracker token={token} photos={photos} qc={qc} day={day} />
+      {openSection === "timeline" ? (
+        <section className="mt-8">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="text-2xl text-foreground">{lang === "bn" ? BN_LABELS.timeline : "Healing timeline"}</h2>
+            <div className="flex items-center gap-1">
+              <button
+                className={`ink-label px-2 py-1 ${lang === "en" ? "bg-foreground text-background" : "underline"}`}
+                onClick={() => setLang("en")}
+              >
+                EN
+              </button>
+              <button
+                className={`ink-label px-2 py-1 ${lang === "bn" ? "bg-foreground text-background" : "underline"}`}
+                onClick={() => setLang("bn")}
+              >
+                বাংলা
+              </button>
+            </div>
+          </div>
+          <button className="ink-label mt-2 underline" onClick={() => setShowAllStages((v) => !v)}>
+            {showAllStages
+              ? lang === "bn"
+                ? BN_LABELS.showToday
+                : "Show today only"
+              : lang === "bn"
+                ? BN_LABELS.showAll
+                : "See all stages"}
+          </button>
+          {!showAllStages ? (
+            <p className="mt-1 text-sm text-muted-foreground">
+              {lang === "bn"
+                ? `আজকের যত্ন দেখানো হচ্ছে — দিন ${day}${nextDay ? ` · পরের চেকপয়েন্ট দিন ${nextDay}` : ""}।`
+                : `Showing today's care only — day ${day}${nextDay ? ` · next checkpoint day ${nextDay}` : ""}.`}
+            </p>
+          ) : null}
+          <ol className="mt-4 space-y-3">
+            {(showAllStages ? stages : stages.filter((s) => s.id === currentStage?.id)).map((s) => {
+              const active = currentStage?.id === s.id;
+              const done = s.day_to !== null && day > s.day_to;
+              const bn = lang === "bn" ? BN_STAGES[s.slug] : undefined;
+              const t = bn ?? s;
+              const state = done
+                ? lang === "bn"
+                  ? BN_LABELS.done
+                  : "done"
+                : active
+                  ? lang === "bn"
+                    ? BN_LABELS.now
+                    : "now"
+                  : lang === "bn"
+                    ? BN_LABELS.soon
+                    : "soon";
+              return (
+                <li key={s.id} className={`ink-card p-5 ${active ? "border-foreground" : ""}`}>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <h3 className="text-xl text-foreground">{t.title}</h3>
+                    <span className="ink-label shrink-0">{state}</span>
+                  </div>
+                  {t.subtitle ? <p className="mt-1 text-sm text-muted-foreground">{t.subtitle}</p> : null}
+                  <div className="mt-4 space-y-3 text-sm text-foreground">
+                    <Instruction label={lang === "bn" ? BN_LABELS.clean : "Clean"} text={t.cleaning} />
+                    <Instruction label={lang === "bn" ? BN_LABELS.moisturize : "Moisturize"} text={t.moisturizing} />
+                    <Instruction label={lang === "bn" ? BN_LABELS.avoid : "Avoid"} text={t.avoid} />
+                    <Instruction label={lang === "bn" ? BN_LABELS.normal : "Normal"} text={t.normal} />
+                    <Instruction label={lang === "bn" ? BN_LABELS.contact : "Call us if"} text={t.contact} />
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+      ) : null}
+
+      {openSection === "tracker" ? <PhotoTracker token={token} photos={photos} qc={qc} day={day} /> : null}
+
 
       <SupportBox token={token} wa={wa} />
 
@@ -210,7 +267,36 @@ function Portal() {
   );
 }
 
+function SectionButton({
+  active,
+  title,
+  subtitle,
+  onClick,
+}: {
+  active: boolean;
+  title: string;
+  subtitle: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`ink-card flex w-full items-center justify-between gap-4 p-5 text-left transition-colors ${
+        active ? "border-foreground bg-foreground text-background" : ""
+      }`}
+    >
+      <span>
+        <span className="block text-xl">{title}</span>
+        <span className={`mt-1 block text-xs ${active ? "opacity-70" : "text-muted-foreground"}`}>{subtitle}</span>
+      </span>
+      <span className="text-2xl leading-none">{active ? "−" : "+"}</span>
+    </button>
+  );
+}
+
 function Centered({ children }: { children: React.ReactNode }) {
+
+
   return (
     <main className="flex min-h-screen items-center justify-center px-6 text-center text-sm text-muted-foreground">
       <div>{children}</div>
