@@ -7,6 +7,7 @@ import {
   getPortal,
   markPortalStep,
   removeHealingPhoto,
+  reactToArtistFeedback,
   requestPhotoAiFeedback,
   sendSupport,
   startPortalUpload,
@@ -526,6 +527,35 @@ function PhotoTracker({
                         <p className="mt-2 text-sm text-foreground">
                           {p.artist_feedback ?? "Your artist hasn't replied to this photo yet."}
                         </p>
+                        {p.artist_feedback ? (
+                          <div className="mt-3 border-t border-border pt-3">
+                            <p className="ink-label">How does this make you feel?</p>
+                            <div className="mt-2 flex gap-2">
+                              {["❤️", "😊", "👍", "😢", "😟"].map((emoji) => (
+                                <button
+                                  key={emoji}
+                                  aria-label={`React with ${emoji}`}
+                                  onClick={async () => {
+                                    try {
+                                      await react({ data: { token, photoId: p.id, reaction: emoji } });
+                                      qc.invalidateQueries({ queryKey: ["portal", token] });
+                                    } catch (e) {
+                                      toast.error(e instanceof Error ? e.message : "Couldn't save reaction");
+                                    }
+                                  }}
+                                  className={cn(
+                                    "flex size-9 items-center justify-center rounded-full border text-lg transition-all",
+                                    p.client_reaction === emoji
+                                      ? "scale-110 border-foreground bg-foreground/10"
+                                      : "border-border hover:border-foreground/50"
+                                  )}
+                                >
+                                  {emoji}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ) : null}
                       </div>
                     </li>
                   ))}
