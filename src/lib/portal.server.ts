@@ -1,6 +1,6 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-export const HEALING_DAYS = [1, 2, 3, 5, 7, 10, 14, 21, 30] as const;
+export const HEALING_DAYS = [1, 2, 3, 5, 7, 15, 30] as const;
 const SIGNED_TTL = 60 * 60;
 
 function fail(message: string): never {
