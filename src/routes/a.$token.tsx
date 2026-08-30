@@ -331,7 +331,7 @@ function PhotoTracker({
       </div>
 
       <div className="mt-4 space-y-3">
-        {HEALING_DAYS.map((marker) => {
+        {visibleDays.map((marker) => {
           const shots = photos.filter((p) => p.day_marker === marker);
           const unlocked = day >= marker;
           return (
