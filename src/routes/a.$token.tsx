@@ -14,8 +14,6 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { UploadZone } from "@/components/UploadZone";
 import { toast } from "sonner";
 import { BN_LABELS, BN_STAGES } from "@/lib/aftercare-bn";
@@ -340,7 +338,6 @@ function PhotoTracker({
   const askAi = useServerFn(requestPhotoAiFeedback);
   const [busy, setBusy] = useState<number | null>(null);
   const [aiBusy, setAiBusy] = useState<string | null>(null);
-  const [note, setNote] = useState("");
   const [showAll, setShowAll] = useState(false);
   const visibleDays = showAll
     ? HEALING_DAYS
@@ -369,8 +366,7 @@ function PhotoTracker({
         .from(target.bucket)
         .uploadToSignedUrl(target.path, target.token, file);
       if (error) throw new Error(error.message);
-      await save({ data: { token, dayMarker: marker, storagePath: target.path, note: note || null } });
-      setNote("");
+      await save({ data: { token, dayMarker: marker, storagePath: target.path } });
       toast.success("Photo saved privately · asking AI for a check…");
       const fresh = await qc.invalidateQueries({ queryKey: ["portal", token] });
       void fresh;
@@ -454,11 +450,6 @@ function PhotoTracker({
         </p>
       </div>
 
-      <div className="mt-4 space-y-2">
-        <Label htmlFor="note">Note for your next upload (optional)</Label>
-        <Input id="note" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Feels itchy today" />
-      </div>
-
       <div className="mt-4 space-y-3">
         {visibleDays.map((marker) => {
           const shots = photos.filter((p) => p.day_marker === marker);
@@ -495,6 +486,16 @@ function PhotoTracker({
                           >
                             Delete photo
                           </button>
+                          <div className="mt-2">
+                            <UploadZone
+                              id={`upload-more-${marker}-${p.id}`}
+                              title="Add another photo"
+                              caption="Camera or gallery"
+                              compact
+                              disabled={busy === marker}
+                              onFile={(f) => upload(f, marker)}
+                            />
+                          </div>
                         </div>
                       </div>
 
@@ -526,16 +527,17 @@ function PhotoTracker({
                 </ul>
               ) : null}
 
-              <div className="mt-4">
-                <UploadZone
-                  id={`upload-${marker}`}
-                  title={shots.length ? "Add another photo" : `Day ${marker} photo`}
-                  caption="Camera or gallery"
-                  compact={shots.length > 0}
-                  disabled={busy === marker}
-                  onFile={(f) => upload(f, marker)}
-                />
-              </div>
+              {shots.length === 0 ? (
+                <div className="mt-4">
+                  <UploadZone
+                    id={`upload-${marker}`}
+                    title={`Day ${marker} photo`}
+                    caption="Camera or gallery"
+                    disabled={busy === marker}
+                    onFile={(f) => upload(f, marker)}
+                  />
+                </div>
+              ) : null}
               {busy === marker ? (
                 <p className="ink-label mt-3 flex items-center gap-2">
                   <span className="inline-block size-1.5 animate-pulse rounded-full bg-foreground" />
