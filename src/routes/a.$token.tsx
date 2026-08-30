@@ -117,6 +117,24 @@ function Portal() {
         </p>
       </header>
 
+      <div className="ink-card mt-6 border-foreground p-5">
+        <p className="ink-label">Today's reminder</p>
+        <p className="mt-2 text-lg text-foreground">
+          {healed
+            ? "Your tattoo is fully healed — keep it moisturised and out of strong sun."
+            : `Day ${day} — ${
+                todayDone
+                  ? `day ${todayMarker} photo is saved. Next checkpoint${nextDay ? `: day ${nextDay}` : ": all done"}.`
+                  : `time for your day ${todayMarker} photo and today's care steps.`
+              }`}
+        </p>
+        {currentStage ? (
+          <p className="mt-2 text-sm text-muted-foreground">{currentStage.title}</p>
+        ) : null}
+      </div>
+
+
+
       {tattoo.photo_url ? (
         <img
           src={tattoo.photo_url}
