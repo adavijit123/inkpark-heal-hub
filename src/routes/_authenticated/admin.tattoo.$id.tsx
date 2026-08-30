@@ -101,6 +101,19 @@ function TattooDetail() {
     },
   });
 
+  const follows = useQuery({
+    queryKey: ["stage-follows", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("stage_follows")
+        .select("id, created_at, aftercare_stages(title)")
+        .eq("tattoo_id", id)
+        .order("created_at");
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const link =
     typeof window !== "undefined" && tattoo.data
       ? `${window.location.origin}/a/${tattoo.data.access_token}`
@@ -148,6 +161,23 @@ function TattooDetail() {
             <div className="mt-5 space-y-3">
               <EditableField id={id} field="style" label="Style" value={t.style} qc={qc} />
               <EditableField id={id} field="placement" label="Placement" value={t.placement} qc={qc} />
+            </div>
+            <div className="mt-5 border-t border-border pt-4">
+              <p className="ink-label">Care steps client is following</p>
+              {follows.data && follows.data.length > 0 ? (
+                <ul className="mt-2 flex flex-wrap gap-2">
+                  {follows.data.map((f) => (
+                    <li
+                      key={f.id}
+                      className="ink-label rounded-full border border-foreground/30 px-3 py-1 text-foreground"
+                    >
+                      ✓ {(f.aftercare_stages as { title: string } | null)?.title ?? "Stage"}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-2 text-sm text-muted-foreground">Client hasn't marked any stage yet.</p>
+              )}
             </div>
           </section>
 
