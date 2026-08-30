@@ -60,7 +60,7 @@ function TattooDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("healing_photos")
-        .select("id, day_marker, storage_path, created_at, note, ai_feedback, artist_feedback")
+        .select("id, day_marker, storage_path, created_at, note, ai_feedback, artist_feedback, client_reaction")
         .eq("tattoo_id", id)
         .order("day_marker");
       if (error) throw error;
@@ -213,7 +213,14 @@ function TattooDetail() {
                         />
                       ) : null}
                       <div className="min-w-0">
-                        <p className="text-sm text-foreground">Day {p.day_marker}</p>
+                        <p className="text-sm text-foreground">
+                          Day {p.day_marker}
+                          {p.client_reaction ? (
+                            <span className="ml-2 rounded-full border border-border px-2 py-0.5 text-sm" title="Client reaction to your feedback">
+                              {p.client_reaction} <span className="ink-label ml-1">client felt</span>
+                            </span>
+                          ) : null}
+                        </p>
                         {p.note ? <p className="mt-1 text-sm text-muted-foreground">“{p.note}”</p> : null}
                         {p.ai_feedback ? (
                           <p className="mt-2 whitespace-pre-line text-xs text-muted-foreground">
