@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ATokenRouteImport } from './routes/a.$token'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedAdminKnowledgeRouteImport } from './routes/_authenticated/admin.knowledge'
 import { Route as AuthenticatedAdminTattooIdRouteImport } from './routes/_authenticated/admin.tattoo.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -40,6 +41,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminKnowledgeRoute =
+  AuthenticatedAdminKnowledgeRouteImport.update({
+    id: '/admin/knowledge',
+    path: '/admin/knowledge',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminTattooIdRoute =
   AuthenticatedAdminTattooIdRouteImport.update({
     id: '/admin/tattoo/$id',
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/a/$token': typeof ATokenRoute
+  '/admin/knowledge': typeof AuthenticatedAdminKnowledgeRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/tattoo/$id': typeof AuthenticatedAdminTattooIdRoute
 }
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/a/$token': typeof ATokenRoute
+  '/admin/knowledge': typeof AuthenticatedAdminKnowledgeRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/tattoo/$id': typeof AuthenticatedAdminTattooIdRoute
 }
@@ -67,20 +76,34 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/a/$token': typeof ATokenRoute
+  '/_authenticated/admin/knowledge': typeof AuthenticatedAdminKnowledgeRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/tattoo/$id': typeof AuthenticatedAdminTattooIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/a/$token' | '/admin/' | '/admin/tattoo/$id'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/a/$token'
+    | '/admin/knowledge'
+    | '/admin/'
+    | '/admin/tattoo/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/a/$token' | '/admin' | '/admin/tattoo/$id'
+  to:
+    | '/'
+    | '/auth'
+    | '/a/$token'
+    | '/admin/knowledge'
+    | '/admin'
+    | '/admin/tattoo/$id'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/a/$token'
+    | '/_authenticated/admin/knowledge'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/tattoo/$id'
   fileRoutesById: FileRoutesById
@@ -129,6 +152,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/knowledge': {
+      id: '/_authenticated/admin/knowledge'
+      path: '/admin/knowledge'
+      fullPath: '/admin/knowledge'
+      preLoaderRoute: typeof AuthenticatedAdminKnowledgeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/tattoo/$id': {
       id: '/_authenticated/admin/tattoo/$id'
       path: '/admin/tattoo/$id'
@@ -140,11 +170,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminKnowledgeRoute: typeof AuthenticatedAdminKnowledgeRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminTattooIdRoute: typeof AuthenticatedAdminTattooIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminKnowledgeRoute: AuthenticatedAdminKnowledgeRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedAdminTattooIdRoute: AuthenticatedAdminTattooIdRoute,
 }
