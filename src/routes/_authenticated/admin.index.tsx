@@ -33,13 +33,6 @@ export const Route = createFileRoute("/_authenticated/admin/")({
 function AdminHome() {
   return (
     <AdminShell title="Dashboard">
-      <Link
-        to="/admin/knowledge"
-        className="mb-6 flex w-full items-center justify-between gap-3 rounded-md border border-border bg-foreground px-5 py-4 text-background transition-opacity hover:opacity-90"
-      >
-        <span className="text-lg leading-none">Aftercare Knowledge Hub</span>
-        <span className="ink-label text-background/70">FAQ →</span>
-      </Link>
       <Tabs defaultValue="sessions">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="sessions">Ink</TabsTrigger>

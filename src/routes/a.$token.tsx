@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import {
   addHealingPhoto,
   getPortal,
@@ -814,6 +814,156 @@ function PostHealing({
         <Button variant="outline" className="w-full" onClick={() => go("rebooking", settings?.booking_url ?? null)}>
           {tattoo.rebooking_requested ? "Rebooking requested ↻" : "Book your next session"}
         </Button>
+      </div>
+    </section>
+  );
+}
+
+function KnowledgeSection({ wa }: { wa: string | null }) {
+  const [query, setQuery] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
+  const waBase = wa ? wa.split("?")[0] : null;
+
+  const results = useMemo(() => searchFaqs(query), [query]);
+  const open = FAQS.find((f) => f.id === openId) ?? null;
+
+  if (open) {
+    return <KnowledgeAnswer faq={open} waBase={waBase} onBack={() => setOpenId(null)} />;
+  }
+
+  return (
+    <section className="mt-8">
+      <h2 className="text-2xl text-foreground">Aftercare Knowledge Hub</h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Straight answers to the questions every client asks while healing.
+      </p>
+
+      <Input
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search your aftercare question…"
+        aria-label="Search aftercare questions"
+        className="mt-4 h-auto rounded-md border-border bg-transparent px-4 py-3 text-sm"
+      />
+      <p className="ink-label mt-2">
+        {query.trim() ? `${results.length} result${results.length === 1 ? "" : "s"}` : "Popular questions"}
+      </p>
+
+      <div className="ink-card mt-3 divide-y divide-border">
+        {results.length === 0 ? (
+          <div className="p-5">
+            <p className="text-sm text-muted-foreground">
+              No matching answer. Try words like “gym”, “water”, “sun”, “itchy” or “peeling” — or message
+              the studio directly.
+            </p>
+          </div>
+        ) : (
+          results.map((f, i) => (
+            <button
+              key={f.id}
+              type="button"
+              onClick={() => setOpenId(f.id)}
+              className="flex w-full items-center gap-4 p-4 text-left transition-colors hover:bg-accent"
+            >
+              <span className="font-display text-lg text-muted-foreground">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <span className="flex-1 text-base text-foreground">{f.question}</span>
+              <span className="ink-label shrink-0">→</span>
+            </button>
+          ))
+        )}
+      </div>
+    </section>
+  );
+}
+
+function KnowledgeAnswer({
+  faq,
+  waBase,
+  onBack,
+}: {
+  faq: Faq;
+  waBase: string | null;
+  onBack: () => void;
+}) {
+  const [vote, setVote] = useState<"up" | "down" | null>(() => {
+    try {
+      const v = localStorage.getItem(`faq-vote-${faq.id}`);
+      return v === "up" || v === "down" ? v : null;
+    } catch {
+      return null;
+    }
+  });
+
+  function cast(v: "up" | "down") {
+    try {
+      localStorage.setItem(`faq-vote-${faq.id}`, v);
+    } catch {
+      /* private mode — still show the choice */
+    }
+    setVote(v);
+    toast.success(v === "up" ? "Glad it helped" : "Thanks — we'll improve this answer");
+  }
+
+  const sections: [string, string][] = [
+    ["What to do", faq.do],
+    ["What to avoid", faq.avoid],
+    ["When to be concerned", faq.concern],
+  ];
+
+  return (
+    <section className="mt-8 space-y-4">
+      <button type="button" onClick={onBack} className="ink-label underline underline-offset-4">
+        ← All questions
+      </button>
+
+      <div className="ink-card space-y-5 p-5">
+        <div>
+          <p className="ink-label">Short answer</p>
+          <h3 className="mt-2 text-2xl leading-tight text-foreground">{faq.question}</h3>
+          <p className="mt-3 text-sm leading-relaxed text-foreground">{faq.short}</p>
+        </div>
+
+        {sections.map(([label, body]) => (
+          <div key={label} className="border-t border-border pt-4">
+            <p className="ink-label">{label}</p>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
+          </div>
+        ))}
+
+        {waBase ? (
+          <a
+            href={`${waBase}?text=${encodeURIComponent(`Hi InkPark, question about aftercare: ${faq.question}`)}`}
+            target="_blank"
+            rel="noreferrer"
+            className="flex w-full items-center justify-center rounded-md bg-foreground px-4 py-3 text-sm font-medium text-background transition-opacity hover:opacity-90"
+          >
+            Talk to InkPark on WhatsApp
+          </a>
+        ) : null}
+
+        <div className="flex items-center justify-center gap-3 border-t border-border pt-4">
+          <p className="ink-label mr-1">Was this helpful?</p>
+          {(
+            [
+              ["up", "👍", "Helpful"],
+              ["down", "👎", "Not helpful"],
+            ] as const
+          ).map(([v, emoji, label]) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => cast(v)}
+              className={cn(
+                "ink-label inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 transition-colors hover:bg-accent",
+                vote === v && "border-foreground bg-foreground text-background animate-emoji-pop",
+              )}
+            >
+              <span className="text-base leading-none">{emoji}</span> {label}
+            </button>
+          ))}
+        </div>
       </div>
     </section>
   );
