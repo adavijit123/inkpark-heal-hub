@@ -582,6 +582,11 @@ function PhotoTracker({
                           />
                         ) : null}
                         <div className="min-w-0 flex-1">
+                          {p.flagged ? (
+                            <p className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-red-600/40 bg-red-50 px-2.5 py-1 text-[10px] font-semibold tracking-[0.12em] text-red-700 uppercase">
+                              ⚠️ Concern reported{p.concern ? ` — ${p.concern}` : ""}
+                            </p>
+                          ) : null}
                           {p.note ? <p className="text-sm text-foreground">“{p.note}”</p> : null}
                           <button
                             onClick={async () => {
@@ -645,6 +650,34 @@ function PhotoTracker({
                     </li>
                   ))}
                 </ul>
+              ) : null}
+
+              {unlocked ? (
+                <div className="mt-4">
+                  <p className="ink-label text-muted-foreground">
+                    ⚠️ Something worrying you? Tap it before uploading — the studio gets alerted
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {CONCERN_OPTIONS.map((c) => {
+                      const active = concerns[marker] === c;
+                      return (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => setConcerns((prev) => ({ ...prev, [marker]: active ? null : c }))}
+                          className={cn(
+                            "rounded-full border px-3 py-1.5 text-[11px] tracking-wide transition-all duration-200 active:scale-[0.97]",
+                            active
+                              ? "animate-emoji-pop border-red-600 bg-red-600 text-white"
+                              : "border-border text-muted-foreground hover:border-red-600/50 hover:text-red-700",
+                          )}
+                        >
+                          {c}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               ) : null}
 
               {shots.length === 0 ? (
