@@ -451,6 +451,8 @@ function PhotoTracker({
     }
   }
 
+  const [concerns, setConcerns] = useState<Record<number, string | null>>({});
+
   async function upload(file: File, marker: number) {
     setBusy(marker);
     try {
@@ -459,8 +461,14 @@ function PhotoTracker({
         .from(target.bucket)
         .uploadToSignedUrl(target.path, target.token, file);
       if (error) throw new Error(error.message);
-      await save({ data: { token, dayMarker: marker, storagePath: target.path } });
-      toast.success("Photo saved privately · asking AI for a check…");
+      const concern = concerns[marker] ?? null;
+      const result = await save({ data: { token, dayMarker: marker, storagePath: target.path, concern } });
+      setConcerns((c) => ({ ...c, [marker]: null }));
+      toast.success(
+        result?.flagged
+          ? "Photo saved · the studio has been alerted about your concern"
+          : "Photo saved privately · asking AI for a check…",
+      );
       const fresh = await qc.invalidateQueries({ queryKey: ["portal", token] });
       void fresh;
       const latest = qc.getQueryData<{ photos: TrackerPhoto[] }>(["portal", token]);
