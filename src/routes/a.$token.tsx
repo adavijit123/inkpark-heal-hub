@@ -98,16 +98,33 @@ function Portal() {
   if (portal.error || !portal.data) {
     const expired = portal.error instanceof Error && portal.error.message.includes("EXPIRED_LINK");
     return (
-      <Centered>
-        <span className="block text-lg text-foreground">
-          {expired ? "This aftercare page has closed" : "This aftercare link isn't valid"}
-        </span>
-        <span className="mt-2 block text-sm text-muted-foreground">
-          {expired
-            ? "Your 30-day healing window is complete, so the link is now deactivated. Your photos and notes are safely kept in your InkPark client record — message the studio if you need them."
-            : "Ask your InkPark artist to resend your personal link."}
-        </span>
-      </Centered>
+      <div className="relative">
+        <div className="fixed inset-x-0 top-0 z-10 mx-auto flex w-full max-w-md items-center justify-between bg-background/90 px-5 py-4 backdrop-blur-sm">
+          <button
+            type="button"
+            onClick={() => window.history.back()}
+            className="ink-label inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 transition-colors hover:bg-accent"
+          >
+            ← Back
+          </button>
+          <Link
+            to="/"
+            className="ink-label inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 transition-colors hover:bg-accent"
+          >
+            Home
+          </Link>
+        </div>
+        <Centered>
+          <span className="block text-lg text-foreground">
+            {expired ? "This aftercare page has closed" : "This aftercare link isn't valid"}
+          </span>
+          <span className="mt-2 block text-sm text-muted-foreground">
+            {expired
+              ? "Your 30-day healing window is complete, so the link is now deactivated. Your photos and notes are safely kept in your InkPark client record — message the studio if you need them."
+              : "Ask your InkPark artist to resend your personal link."}
+          </span>
+        </Centered>
+      </div>
     );
   }
 
