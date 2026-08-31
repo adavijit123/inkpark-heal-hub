@@ -128,45 +128,43 @@ function Portal() {
 
   return (
     <main className="mx-auto w-full max-w-md px-5 pb-32 pt-10">
-      <header>
+      <header className="text-center">
         <p className="ink-label">InkPark Tattoo Studio</p>
-        <h1 className="mt-2 text-4xl leading-none text-foreground">{client.full_name}</h1>
-        <p className="mt-3 text-sm text-muted-foreground">
-          Day {day} of healing{artist ? ` · ${artist.name}` : ""}
-        </p>
       </header>
 
-      <div className="ink-card mt-6 border-foreground p-5">
-        <p className="ink-label">Today's reminder</p>
-        <p className="mt-2 text-lg text-foreground">
+      <div className="ink-card mt-4 border-foreground p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-5xl leading-none text-foreground">{client.full_name}</h1>
+            <p className="mt-1.5 text-sm text-muted-foreground">
+              Day {day} of healing{artist ? ` · ${artist.name}` : ""}
+            </p>
+          </div>
+          <p className="ink-label shrink-0 pt-1">Today's reminder</p>
+        </div>
+
+        <dl className="mt-5 grid grid-cols-3 gap-4">
+          <Meta label="Date" value={tattoo.tattoo_date} />
+          <Meta label="Style" value={tattoo.style ?? "—"} />
+          <Meta label="Placement" value={tattoo.placement ?? "—"} />
+        </dl>
+
+        <p className="mt-5 border-t border-border pt-4 text-center text-sm text-foreground">
           {healed
-            ? "Your tattoo is fully healed — keep it moisturised and out of strong sun."
-            : `Day ${day} — ${
-                todayDone
-                  ? `day ${todayMarker} photo is saved. Next checkpoint${nextDay ? `: day ${nextDay}` : ": all done"}.`
-                  : `time for your day ${todayMarker} photo and today's care steps.`
-              }`}
+            ? "Fully healed — keep it moisturised and out of strong sun."
+            : todayDone
+              ? `Day ${todayMarker} photo saved. Next checkpoint: day ${nextDay ?? "—"}.`
+              : `Next checkpoint: day ${nextDay ?? todayMarker}.`}
         </p>
-        {currentStage ? (
-          <p className="mt-2 text-sm text-muted-foreground">{currentStage.title}</p>
-        ) : null}
       </div>
-
-
 
       {tattoo.photo_url ? (
         <img
           src={tattoo.photo_url}
           alt="Your finished tattoo, photographed at the studio"
-          className="mt-6 w-full rounded-lg object-cover"
+          className="mt-4 w-full rounded-lg object-cover"
         />
       ) : null}
-
-      <dl className="ink-card mt-6 grid grid-cols-3 gap-4 p-5">
-        <Meta label="Date" value={tattoo.tattoo_date} />
-        <Meta label="Style" value={tattoo.style ?? "—"} />
-        <Meta label="Placement" value={tattoo.placement ?? "—"} />
-      </dl>
 
       <section className="mt-8 grid grid-cols-1 gap-3">
         <SectionButton
