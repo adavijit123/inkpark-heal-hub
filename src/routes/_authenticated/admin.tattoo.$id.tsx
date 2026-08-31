@@ -60,7 +60,7 @@ function TattooDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("healing_photos")
-        .select("id, day_marker, storage_path, created_at, note, ai_feedback, artist_feedback, client_reaction")
+        .select("id, day_marker, storage_path, created_at, note, ai_feedback, artist_feedback, client_reaction, flagged, concern")
         .eq("tattoo_id", id)
         .order("day_marker");
       if (error) throw error;
