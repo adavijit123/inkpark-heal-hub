@@ -36,14 +36,6 @@ export type PortalHealingPhoto = {
   concern: string | null;
 };
 
-export const CONCERN_OPTIONS = [
-  "Redness is getting worse",
-  "Pain is increasing",
-  "Fluid, pus or swelling",
-  "Fever or feeling unwell",
-  "Something else worries me",
-] as const;
-
 const ALERT_WORDS = [
   "worse",
   "worsening",
