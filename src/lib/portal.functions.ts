@@ -94,3 +94,13 @@ export const requestPhotoAiFeedback = createServerFn({ method: "POST" })
     const { requestAiFeedback } = await import("./portal.server");
     return requestAiFeedback(data.token, data.photoId);
   });
+
+export const updateReminderSetting = createServerFn({ method: "POST" })
+  .inputValidator((d: { token: string; enabled: boolean }) => ({
+    token: String(d.token ?? ""),
+    enabled: Boolean(d.enabled),
+  }))
+  .handler(async ({ data }) => {
+    const { setReminderPreference } = await import("./portal.server");
+    return setReminderPreference(data.token, data.enabled);
+  });

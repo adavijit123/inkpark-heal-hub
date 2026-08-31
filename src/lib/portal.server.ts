@@ -72,6 +72,7 @@ export type PortalData = {
     photo_url: string | null;
     review_submitted: boolean;
     rebooking_requested: boolean;
+    reminders_enabled: boolean;
   };
   client: { full_name: string };
   artist: { name: string; instagram: string | null } | null;
@@ -101,7 +102,7 @@ async function resolveTattoo(token: string) {
   if (!clean || clean.length < 16 || !/^[a-f0-9]+$/i.test(clean)) fail("Invalid link");
   const { data, error } = await supabaseAdmin
     .from("tattoos")
-    .select("id, tattoo_date, style, placement, photo_path, review_submitted, rebooking_requested, client_id, artist_id")
+    .select("id, tattoo_date, style, placement, photo_path, review_submitted, rebooking_requested, reminders_enabled, client_id, artist_id")
     .eq("access_token", clean)
     .maybeSingle();
   if (error) fail(error.message);
@@ -169,6 +170,7 @@ export async function loadPortal(token: string): Promise<PortalData> {
       photo_url: await signed("tattoo-photos", tattoo.photo_path),
       review_submitted: tattoo.review_submitted,
       rebooking_requested: tattoo.rebooking_requested,
+      reminders_enabled: tattoo.reminders_enabled ?? true,
     },
     client: { full_name: clientRes.data?.full_name ?? "Client" },
     artist: artistRes.data ? { name: artistRes.data.name, instagram: artistRes.data.instagram } : null,
@@ -283,6 +285,16 @@ export async function toggleStageFollow(token: string, stageId: string) {
     .insert({ tattoo_id: tattoo.id, stage_id: stageId });
   if (error) fail(error.message);
   return { ok: true, following: true };
+}
+
+export async function setReminderPreference(token: string, enabled: boolean) {
+  const tattoo = await resolveTattoo(token);
+  const { error } = await supabaseAdmin
+    .from("tattoos")
+    .update({ reminders_enabled: enabled })
+    .eq("id", tattoo.id);
+  if (error) fail(error.message);
+  return { ok: true, enabled };
 }
 
 export async function markPortalAction(token: string, action: "review" | "rebooking") {
