@@ -818,8 +818,8 @@ function ReactionBar({
 
   return (
     <div className="mt-3 border-t border-border pt-3">
-      <p className="ink-label">How does this make you feel?</p>
-      <div className="relative mt-2 flex gap-2">
+      <p className="ink-label text-center">How does this make you feel?</p>
+      <div className="relative mt-2 flex justify-center gap-2">
         {burst ? (
           <div key={burst.id} className="pointer-events-none absolute inset-0 z-10" aria-hidden>
             {[-2, -1.2, 0, 1.2, 2].map((i, idx) => (
