@@ -260,6 +260,20 @@ function Clients() {
     qc.invalidateQueries({ queryKey: ["clients-full"] });
   }
 
+  async function remove(id: string, clientName: string) {
+    if (!window.confirm(`Delete client "${clientName}"? Their sessions will also be removed. This cannot be undone.`))
+      return;
+    const { error } = await supabase.from("clients").delete().eq("id", id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Client deleted");
+    qc.invalidateQueries({ queryKey: ["clients-full"] });
+    qc.invalidateQueries({ queryKey: ["clients"] });
+    qc.invalidateQueries({ queryKey: ["tattoos"] });
+  }
+
   return (
     <div className="space-y-4">
       <div className="ink-card space-y-3 p-5">
@@ -273,18 +287,28 @@ function Clients() {
       </div>
 
       <div className="ink-card divide-y divide-border">
+        {(clients.data ?? []).length === 0 ? (
+          <p className="p-5 text-sm text-muted-foreground">No clients yet.</p>
+        ) : null}
         {(clients.data ?? []).map((c) => (
           <div key={c.id} className="flex items-center justify-between gap-3 p-4">
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="truncate text-base text-foreground">{c.full_name}</p>
               <p className="ink-label mt-1 truncate">{c.phone ?? c.email ?? "No contact"}</p>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <span className="ink-label">Share OK</span>
               <Switch
                 checked={c.photo_sharing_consent}
                 onCheckedChange={(v) => toggleConsent(c.id, v)}
               />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-destructive"
+                onClick={() => remove(c.id, c.full_name)}
+              >
+                Delete
+              </Button>
             </div>
           </div>
         ))}
