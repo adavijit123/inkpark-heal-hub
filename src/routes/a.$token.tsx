@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { UploadZone } from "@/components/UploadZone";
 import { toast } from "sonner";
 import { BN_LABELS, BN_STAGES } from "@/lib/aftercare-bn";
+import { FAQS, searchFaqs, type Faq } from "@/lib/aftercare-faq";
 import { cn } from "@/lib/utils";
 
 
@@ -81,7 +82,7 @@ function Portal() {
     retry: false,
   });
   const [showAllStages, setShowAllStages] = useState(false);
-  const [openSection, setOpenSection] = useState<"timeline" | "tracker" | null>(null);
+  const [openSection, setOpenSection] = useState<"timeline" | "tracker" | "knowledge" | null>(null);
   const [lang, setLang] = useState<"en" | "bn">("en");
 
 
@@ -175,6 +176,12 @@ function Portal() {
           title="Healing photo tracker"
           onClick={() => setOpenSection((s) => (s === "tracker" ? null : "tracker"))}
         />
+        <SectionButton
+          active={openSection === "knowledge"}
+          index="03"
+          title="Aftercare knowledge hub"
+          onClick={() => setOpenSection((s) => (s === "knowledge" ? null : "knowledge"))}
+        />
       </section>
 
       {openSection === "timeline" ? (
@@ -226,6 +233,9 @@ function Portal() {
       ) : null}
 
       {openSection === "tracker" ? <PhotoTracker token={token} photos={photos} qc={qc} day={day} /> : null}
+
+      {openSection === "knowledge" ? <KnowledgeSection wa={wa} /> : null}
+
 
 
       <SupportBox token={token} wa={wa} />
