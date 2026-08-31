@@ -643,35 +643,6 @@ function PhotoTracker({
                         <p className="mt-2 text-sm text-foreground">
                           {p.artist_feedback ?? "Your artist hasn't replied to this photo yet."}
                         </p>
-
-                        {unlocked ? (
-                          <div className="mt-3 border-t border-border pt-3">
-                            <p className="ink-label text-center text-muted-foreground">
-                              ⚠️ Something worrying you? Tap it before uploading — the studio gets alerted
-                            </p>
-                            <div className="mt-2 flex flex-wrap justify-center gap-1.5">
-                              {CONCERN_OPTIONS.map((c) => {
-                                const active = concerns[marker] === c;
-                                return (
-                                  <button
-                                    key={c}
-                                    type="button"
-                                    onClick={() => setConcerns((prev) => ({ ...prev, [marker]: active ? null : c }))}
-                                    className={cn(
-                                      "rounded-full border px-3 py-1.5 text-[11px] tracking-wide transition-all duration-200 active:scale-[0.97]",
-                                      active
-                                        ? "animate-emoji-pop border-red-600 bg-red-600 text-white"
-                                        : "border-border text-muted-foreground hover:border-red-600/50 hover:text-red-700",
-                                    )}
-                                  >
-                                    {c}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        ) : null}
-
                         {p.artist_feedback ? (
                           <ReactionBar
                             token={token}
@@ -686,8 +657,20 @@ function PhotoTracker({
                 </ul>
               ) : null}
 
-              {shots.length === 0 && unlocked ? (
+              {shots.length === 0 ? (
                 <div className="mt-4">
+                  <UploadZone
+                    id={`upload-${marker}`}
+                    title={`Day ${marker} photo`}
+                    caption="Camera or gallery"
+                    disabled={busy === marker}
+                    onFile={(f) => upload(f, marker)}
+                  />
+                </div>
+              ) : null}
+
+              {unlocked ? (
+                <div className={shots.length ? "mt-4 border-t border-border pt-4" : "mt-4"}>
                   <p className="ink-label text-center text-muted-foreground">
                     ⚠️ Something worrying you? Tap it before uploading — the studio gets alerted
                   </p>
@@ -711,18 +694,6 @@ function PhotoTracker({
                       );
                     })}
                   </div>
-                </div>
-              ) : null}
-
-              {shots.length === 0 ? (
-                <div className="mt-4">
-                  <UploadZone
-                    id={`upload-${marker}`}
-                    title={`Day ${marker} photo`}
-                    caption="Camera or gallery"
-                    disabled={busy === marker}
-                    onFile={(f) => upload(f, marker)}
-                  />
                 </div>
               ) : null}
               {busy === marker ? (
