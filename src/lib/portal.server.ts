@@ -32,7 +32,35 @@ export type PortalHealingPhoto = {
   artist_feedback: string | null;
   artist_feedback_at: string | null;
   client_reaction: string | null;
+  flagged: boolean;
+  concern: string | null;
 };
+
+const ALERT_WORDS = [
+  "worse",
+  "worsening",
+  "increasing",
+  "spreading",
+  "pus",
+  "fever",
+  "infection",
+  "infected",
+  "swollen",
+  "swelling",
+  "redness",
+  "pain",
+  "bleeding",
+  "rash",
+  "doctor",
+  "concern",
+  "unwell",
+];
+
+export function looksConcerning(text: string | null | undefined) {
+  if (!text) return false;
+  const t = text.toLowerCase();
+  return ALERT_WORDS.some((w) => t.includes(w));
+}
 
 
 export type PortalData = {
@@ -104,7 +132,7 @@ export async function loadPortal(token: string): Promise<PortalData> {
       .order("sort_order"),
     supabaseAdmin
       .from("healing_photos")
-      .select("id, day_marker, note, created_at, storage_path, ai_feedback, ai_status, artist_feedback, artist_feedback_at, client_reaction")
+      .select("id, day_marker, note, created_at, storage_path, ai_feedback, ai_status, artist_feedback, artist_feedback_at, client_reaction, flagged, concern")
       .eq("tattoo_id", tattoo.id)
       .order("day_marker"),
     supabaseAdmin
@@ -126,6 +154,8 @@ export async function loadPortal(token: string): Promise<PortalData> {
       artist_feedback: p.artist_feedback,
       artist_feedback_at: p.artist_feedback_at,
       client_reaction: p.client_reaction,
+      flagged: p.flagged,
+      concern: p.concern,
     })),
   );
 
@@ -168,15 +198,26 @@ export async function saveHealingPhoto(
   dayMarker: number,
   storagePath: string,
   note: string | null,
+  concern: string | null,
 ) {
   const tattoo = await resolveTattoo(token);
   if (!HEALING_DAYS.includes(dayMarker as (typeof HEALING_DAYS)[number])) fail("Unknown healing stage");
   if (!storagePath.startsWith(`${tattoo.id}/`)) fail("Invalid upload");
+  const cleanConcern = concern?.trim().slice(0, 200) || null;
+  // Any reported concern — or wording that sounds worrying — raises the red flag
+  const flagged = Boolean(cleanConcern) || looksConcerning(note);
   const { error } = await supabaseAdmin
     .from("healing_photos")
-    .insert({ tattoo_id: tattoo.id, day_marker: dayMarker, storage_path: storagePath, note });
+    .insert({
+      tattoo_id: tattoo.id,
+      day_marker: dayMarker,
+      storage_path: storagePath,
+      note,
+      concern: cleanConcern ?? (flagged ? note : null),
+      flagged,
+    });
   if (error) fail(error.message);
-  return { ok: true };
+  return { ok: true, flagged };
 }
 
 export async function saveClientReaction(token: string, photoId: string, reaction: string) {
@@ -303,9 +344,17 @@ export async function requestAiFeedback(token: string, photoId: string) {
   const text = json.choices?.[0]?.message?.content?.trim();
   if (!text) fail("AI returned no feedback");
 
+  // If the AI itself spots something worrying, raise the red flag for staff too
+  const aiFlag = looksConcerning(text);
   await supabaseAdmin
     .from("healing_photos")
-    .update({ ai_feedback: text, ai_status: "done" })
+    .update({
+      ai_feedback: text,
+      ai_status: "done",
+      ...(aiFlag
+        ? { flagged: true, concern: photo.note ? photo.note : "AI check noticed something that needs attention" }
+        : {}),
+    })
     .eq("id", photo.id)
     .eq("tattoo_id", tattoo.id);
 

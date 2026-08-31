@@ -132,8 +132,10 @@ export type Database = {
           artist_feedback: string | null
           artist_feedback_at: string | null
           client_reaction: string | null
+          concern: string | null
           created_at: string
           day_marker: number
+          flagged: boolean
           id: string
           note: string | null
           storage_path: string
@@ -145,8 +147,10 @@ export type Database = {
           artist_feedback?: string | null
           artist_feedback_at?: string | null
           client_reaction?: string | null
+          concern?: string | null
           created_at?: string
           day_marker: number
+          flagged?: boolean
           id?: string
           note?: string | null
           storage_path: string
@@ -158,8 +162,10 @@ export type Database = {
           artist_feedback?: string | null
           artist_feedback_at?: string | null
           client_reaction?: string | null
+          concern?: string | null
           created_at?: string
           day_marker?: number
+          flagged?: boolean
           id?: string
           note?: string | null
           storage_path?: string

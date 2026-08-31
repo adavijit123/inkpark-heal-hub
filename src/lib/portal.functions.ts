@@ -19,15 +19,18 @@ export const startPortalUpload = createServerFn({ method: "POST" })
   });
 
 export const addHealingPhoto = createServerFn({ method: "POST" })
-  .inputValidator((d: { token: string; dayMarker: number; storagePath: string; note?: string | null }) => ({
-    token: String(d.token ?? ""),
-    dayMarker: Number(d.dayMarker),
-    storagePath: String(d.storagePath ?? ""),
-    note: d.note ? String(d.note).slice(0, 300) : null,
-  }))
+  .inputValidator(
+    (d: { token: string; dayMarker: number; storagePath: string; note?: string | null; concern?: string | null }) => ({
+      token: String(d.token ?? ""),
+      dayMarker: Number(d.dayMarker),
+      storagePath: String(d.storagePath ?? ""),
+      note: d.note ? String(d.note).slice(0, 300) : null,
+      concern: d.concern ? String(d.concern).slice(0, 200) : null,
+    }),
+  )
   .handler(async ({ data }) => {
     const { saveHealingPhoto } = await import("./portal.server");
-    return saveHealingPhoto(data.token, data.dayMarker, data.storagePath, data.note);
+    return saveHealingPhoto(data.token, data.dayMarker, data.storagePath, data.note, data.concern);
   });
 
 export const removeHealingPhoto = createServerFn({ method: "POST" })

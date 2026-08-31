@@ -102,6 +102,15 @@ function Sessions() {
     },
   });
 
+  const flags = useQuery({
+    queryKey: ["healing-flags"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("healing_photos").select("tattoo_id").eq("flagged", true);
+      if (error) throw error;
+      return new Set((data ?? []).map((r) => r.tattoo_id as string));
+    },
+  });
+
   async function create() {
     if (!clientId) {
       toast.error("Pick a client first");
@@ -202,6 +211,11 @@ function Sessions() {
               </p>
             </div>
             <span className="ink-label shrink-0">
+              {flags.data?.has(t.id) ? (
+                <span className="mr-1 rounded-full bg-red-600 px-2 py-0.5 text-[10px] font-bold text-white">
+                  ⚠️ ATTENTION
+                </span>
+              ) : null}
               {t.review_submitted ? "★" : ""} {t.rebooking_requested ? "↻" : ""}
             </span>
           </Link>
