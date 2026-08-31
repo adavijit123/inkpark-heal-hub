@@ -128,45 +128,43 @@ function Portal() {
 
   return (
     <main className="mx-auto w-full max-w-md px-5 pb-32 pt-10">
-      <header>
+      <header className="text-center">
         <p className="ink-label">InkPark Tattoo Studio</p>
-        <h1 className="mt-2 text-4xl leading-none text-foreground">{client.full_name}</h1>
-        <p className="mt-3 text-sm text-muted-foreground">
-          Day {day} of healing{artist ? ` · ${artist.name}` : ""}
-        </p>
       </header>
 
-      <div className="ink-card mt-6 border-foreground p-5">
-        <p className="ink-label">Today's reminder</p>
-        <p className="mt-2 text-lg text-foreground">
+      <div className="ink-card mt-4 border-foreground p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-5xl leading-none text-foreground">{client.full_name}</h1>
+            <p className="mt-1.5 text-sm text-muted-foreground">
+              Day {day} of healing{artist ? ` · ${artist.name}` : ""}
+            </p>
+          </div>
+          <p className="ink-label shrink-0 pt-1">Today's reminder</p>
+        </div>
+
+        <dl className="mt-5 grid grid-cols-3 gap-4">
+          <Meta label="Date" value={tattoo.tattoo_date} />
+          <Meta label="Style" value={tattoo.style ?? "—"} />
+          <Meta label="Placement" value={tattoo.placement ?? "—"} />
+        </dl>
+
+        <p className="mt-5 border-t border-border pt-4 text-center text-sm text-foreground">
           {healed
-            ? "Your tattoo is fully healed — keep it moisturised and out of strong sun."
-            : `Day ${day} — ${
-                todayDone
-                  ? `day ${todayMarker} photo is saved. Next checkpoint${nextDay ? `: day ${nextDay}` : ": all done"}.`
-                  : `time for your day ${todayMarker} photo and today's care steps.`
-              }`}
+            ? "Fully healed — keep it moisturised and out of strong sun."
+            : todayDone
+              ? `Day ${todayMarker} photo saved. Next checkpoint: day ${nextDay ?? "—"}.`
+              : `Next checkpoint: day ${nextDay ?? todayMarker}.`}
         </p>
-        {currentStage ? (
-          <p className="mt-2 text-sm text-muted-foreground">{currentStage.title}</p>
-        ) : null}
       </div>
-
-
 
       {tattoo.photo_url ? (
         <img
           src={tattoo.photo_url}
           alt="Your finished tattoo, photographed at the studio"
-          className="mt-6 w-full rounded-lg object-cover"
+          className="mt-4 w-full rounded-lg object-cover"
         />
       ) : null}
-
-      <dl className="ink-card mt-6 grid grid-cols-3 gap-4 p-5">
-        <Meta label="Date" value={tattoo.tattoo_date} />
-        <Meta label="Style" value={tattoo.style ?? "—"} />
-        <Meta label="Placement" value={tattoo.placement ?? "—"} />
-      </dl>
 
       <section className="mt-8 grid grid-cols-1 gap-3">
         <SectionButton
@@ -588,31 +586,38 @@ function PhotoTracker({
                             </p>
                           ) : null}
                           {p.note ? <p className="text-sm text-foreground">“{p.note}”</p> : null}
-                          <button
-                            onClick={async () => {
-                              await remove({ data: { token, photoId: p.id } });
-                              qc.invalidateQueries({ queryKey: ["portal", token] });
-                            }}
-                            className="ink-label mt-2 underline"
-                          >
-                            Delete photo
-                          </button>
-                          <label
-                            className={`ink-label mt-2 inline-flex cursor-pointer items-center rounded-md border border-border px-3 py-2 uppercase transition-colors hover:bg-muted ${busy === marker ? "pointer-events-none opacity-50" : ""}`}
-                          >
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              disabled={busy === marker}
-                              onChange={(e) => {
-                                const f = e.target.files?.[0];
-                                if (f) upload(f, marker);
-                                e.currentTarget.value = "";
+                          <div className="mt-3 flex items-center gap-2.5">
+                            <button
+                              onClick={async () => {
+                                await remove({ data: { token, photoId: p.id } });
+                                qc.invalidateQueries({ queryKey: ["portal", token] });
                               }}
-                            />
-                            Add another photo
-                          </label>
+                              aria-label="Delete photo"
+                              className="flex size-9 items-center justify-center rounded-lg text-destructive transition-colors hover:bg-destructive/10"
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-4">
+                                <path d="M3 6h18" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                              </svg>
+                            </button>
+                            <label
+                              className={`ink-label inline-flex cursor-pointer items-center rounded-full border border-foreground/40 px-4 py-2 tracking-[0.12em] transition-colors hover:bg-muted ${busy === marker ? "pointer-events-none opacity-50" : ""}`}
+                            >
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                disabled={busy === marker}
+                                onChange={(e) => {
+                                  const f = e.target.files?.[0];
+                                  if (f) upload(f, marker);
+                                  e.currentTarget.value = "";
+                                }}
+                              />
+                              Add another photo
+                            </label>
+                          </div>
                         </div>
                       </div>
 
@@ -638,6 +643,35 @@ function PhotoTracker({
                         <p className="mt-2 text-sm text-foreground">
                           {p.artist_feedback ?? "Your artist hasn't replied to this photo yet."}
                         </p>
+
+                        {unlocked ? (
+                          <div className="mt-3 border-t border-border pt-3">
+                            <p className="ink-label text-center text-muted-foreground">
+                              ⚠️ Something worrying you? Tap it before uploading — the studio gets alerted
+                            </p>
+                            <div className="mt-2 flex flex-wrap justify-center gap-1.5">
+                              {CONCERN_OPTIONS.map((c) => {
+                                const active = concerns[marker] === c;
+                                return (
+                                  <button
+                                    key={c}
+                                    type="button"
+                                    onClick={() => setConcerns((prev) => ({ ...prev, [marker]: active ? null : c }))}
+                                    className={cn(
+                                      "rounded-full border px-3 py-1.5 text-[11px] tracking-wide transition-all duration-200 active:scale-[0.97]",
+                                      active
+                                        ? "animate-emoji-pop border-red-600 bg-red-600 text-white"
+                                        : "border-border text-muted-foreground hover:border-red-600/50 hover:text-red-700",
+                                    )}
+                                  >
+                                    {c}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ) : null}
+
                         {p.artist_feedback ? (
                           <ReactionBar
                             token={token}
@@ -652,7 +686,7 @@ function PhotoTracker({
                 </ul>
               ) : null}
 
-              {unlocked ? (
+              {shots.length === 0 && unlocked ? (
                 <div className="mt-4">
                   <p className="ink-label text-center text-muted-foreground">
                     ⚠️ Something worrying you? Tap it before uploading — the studio gets alerted
@@ -784,8 +818,8 @@ function ReactionBar({
 
   return (
     <div className="mt-3 border-t border-border pt-3">
-      <p className="ink-label">How does this make you feel?</p>
-      <div className="relative mt-2 flex gap-2">
+      <p className="ink-label text-center">How does this make you feel?</p>
+      <div className="relative mt-2 flex justify-center gap-2">
         {burst ? (
           <div key={burst.id} className="pointer-events-none absolute inset-0 z-10" aria-hidden>
             {[-2, -1.2, 0, 1.2, 2].map((i, idx) => (
