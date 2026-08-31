@@ -15,6 +15,7 @@ import {
 } from "@/lib/portal.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { UploadZone } from "@/components/UploadZone";
 import { toast } from "sonner";
@@ -822,7 +823,7 @@ function PostHealing({
 function KnowledgeSection({ wa }: { wa: string | null }) {
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
-  const waBase = wa ? wa.split("?")[0] : null;
+  const waBase = wa ? (wa.split("?")[0] ?? null) : null;
 
   const results = useMemo(() => searchFaqs(query), [query]);
   const open = FAQS.find((f) => f.id === openId) ?? null;
