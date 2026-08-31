@@ -657,8 +657,20 @@ function PhotoTracker({
                 </ul>
               ) : null}
 
-              {shots.length === 0 && unlocked ? (
+              {shots.length === 0 ? (
                 <div className="mt-4">
+                  <UploadZone
+                    id={`upload-${marker}`}
+                    title={`Day ${marker} photo`}
+                    caption="Camera or gallery"
+                    disabled={busy === marker}
+                    onFile={(f) => upload(f, marker)}
+                  />
+                </div>
+              ) : null}
+
+              {unlocked ? (
+                <div className={shots.length ? "mt-4 border-t border-border pt-4" : "mt-4"}>
                   <p className="ink-label text-center text-muted-foreground">
                     ⚠️ Something worrying you? Tap it before uploading — the studio gets alerted
                   </p>
@@ -682,18 +694,6 @@ function PhotoTracker({
                       );
                     })}
                   </div>
-                </div>
-              ) : null}
-
-              {shots.length === 0 ? (
-                <div className="mt-4">
-                  <UploadZone
-                    id={`upload-${marker}`}
-                    title={`Day ${marker} photo`}
-                    caption="Camera or gallery"
-                    disabled={busy === marker}
-                    onFile={(f) => upload(f, marker)}
-                  />
                 </div>
               ) : null}
               {busy === marker ? (
