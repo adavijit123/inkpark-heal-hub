@@ -242,6 +242,40 @@ function TattooDetail() {
             </div>
           </section>
 
+          {(healing.data ?? []).some((p) => p.flagged) ? (
+            <section className="rounded-lg border-2 border-red-600 bg-red-50 p-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-base font-bold tracking-wide text-red-700 uppercase">
+                    ⚠️ Client Needs Attention
+                  </p>
+                  <p className="mt-1 text-sm text-red-700/80">
+                    {(healing.data ?? []).filter((p) => p.flagged).length} flagged upload
+                    {(healing.data ?? []).filter((p) => p.flagged).length > 1 ? "s" : ""} — latest: “
+                    {(healing.data ?? []).filter((p) => p.flagged).slice(-1)[0]?.concern ?? "concern reported"}”
+                  </p>
+                </div>
+                {(() => {
+                  const phone = t.clients?.phone?.replace(/[^0-9]/g, "") ?? "";
+                  return phone ? (
+                    <a
+                      href={`https://wa.me/${phone}?text=${encodeURIComponent(
+                        `Hi ${t.clients?.full_name ?? "there"}, this is InkPark Tattoo Studio — we saw your healing update and want to check in. How is the tattoo feeling?`,
+                      )}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 rounded-full bg-red-600 px-4 py-2 text-xs font-semibold tracking-[0.12em] text-white uppercase transition-transform hover:scale-[1.03] active:scale-[0.98]"
+                    >
+                      Message client on WhatsApp →
+                    </a>
+                  ) : (
+                    <p className="text-xs text-red-700/70">No phone on file for this client.</p>
+                  );
+                })()}
+              </div>
+            </section>
+          ) : null}
+
           <section className="ink-card p-5">
             <p className="ink-label">Healing photos &amp; feedback</p>
             {(healing.data ?? []).length === 0 ? (
