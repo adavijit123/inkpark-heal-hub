@@ -329,8 +329,51 @@ function Artists() {
     qc.invalidateQueries({ queryKey: ["artists"] });
   }
 
+  async function remove(id: string, artistName: string) {
+    if (!window.confirm(`Delete artist "${artistName}"? This cannot be undone.`)) return;
+    const { error } = await supabase.from("artists").delete().eq("id", id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Artist deleted");
+    qc.invalidateQueries({ queryKey: ["artists-full"] });
+    qc.invalidateQueries({ queryKey: ["artists"] });
+  }
+
   return (
     <div className="space-y-4">
+      <div className="ink-card divide-y divide-border">
+        {(artists.data ?? []).length === 0 ? (
+          <p className="p-5 text-sm text-muted-foreground">No artists yet.</p>
+        ) : null}
+        {(artists.data ?? []).map((a) => (
+          <div key={a.id} className="flex items-center justify-between gap-3 p-4">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-base text-foreground">{a.name}</p>
+              <p className="ink-label mt-1 block truncate">{a.instagram ?? "—"}</p>
+            </div>
+            <div className="flex shrink-0 items-center gap-3">
+              <Switch
+                checked={a.active}
+                onCheckedChange={async (v) => {
+                  await supabase.from("artists").update({ active: v }).eq("id", a.id);
+                  qc.invalidateQueries({ queryKey: ["artists-full"] });
+                }}
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-destructive"
+                onClick={() => remove(a.id, a.name)}
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+
       <div className="ink-card space-y-3 p-5">
         <Label htmlFor="an">New artist</Label>
         <Input id="an" placeholder="Artist name" value={name} onChange={(e) => setName(e.target.value)} />
@@ -338,23 +381,6 @@ function Artists() {
         <Button className="w-full" onClick={add}>
           Add artist
         </Button>
-      </div>
-      <div className="ink-card divide-y divide-border">
-        {(artists.data ?? []).map((a) => (
-          <div key={a.id} className="flex items-center justify-between p-4">
-            <div>
-              <p className="text-base text-foreground">{a.name}</p>
-              <p className="ink-label mt-1">{a.instagram ?? "—"}</p>
-            </div>
-            <Switch
-              checked={a.active}
-              onCheckedChange={async (v) => {
-                await supabase.from("artists").update({ active: v }).eq("id", a.id);
-                qc.invalidateQueries({ queryKey: ["artists-full"] });
-              }}
-            />
-          </div>
-        ))}
       </div>
     </div>
   );
