@@ -301,6 +301,23 @@ function TattooDetail() {
                             </span>
                           ) : null}
                         </p>
+                        {p.flagged ? (
+                          <div className="mt-2 flex flex-wrap items-center gap-2">
+                            <span className="inline-flex items-center gap-1 rounded-full border border-red-600/40 bg-red-50 px-2.5 py-1 text-[10px] font-semibold tracking-[0.12em] text-red-700 uppercase">
+                              ⚠️ {p.concern ?? "Needs attention"}
+                            </span>
+                            <button
+                              className="ink-label underline"
+                              onClick={async () => {
+                                await supabase.from("healing_photos").update({ flagged: false }).eq("id", p.id);
+                                qc.invalidateQueries({ queryKey: ["healing", id] });
+                                toast.success("Flag cleared");
+                              }}
+                            >
+                              Mark handled
+                            </button>
+                          </div>
+                        ) : null}
                         {p.note ? <p className="mt-1 text-sm text-muted-foreground">“{p.note}”</p> : null}
                         {p.ai_feedback ? (
                           <p className="mt-2 whitespace-pre-line text-xs text-muted-foreground">
