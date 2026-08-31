@@ -654,10 +654,10 @@ function PhotoTracker({
 
               {unlocked ? (
                 <div className="mt-4">
-                  <p className="ink-label text-muted-foreground">
+                  <p className="ink-label text-center text-muted-foreground">
                     ⚠️ Something worrying you? Tap it before uploading — the studio gets alerted
                   </p>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
+                  <div className="mt-2 flex flex-wrap justify-center gap-1.5">
                     {CONCERN_OPTIONS.map((c) => {
                       const active = concerns[marker] === c;
                       return (
