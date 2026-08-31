@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState, type CSSProperties } from "react";
@@ -128,6 +128,21 @@ function Portal() {
 
   return (
     <main className="mx-auto w-full max-w-md px-5 pb-32 pt-10">
+      <div className="fixed inset-x-0 top-0 z-10 mx-auto flex w-full max-w-md items-center justify-between bg-background/90 px-5 py-4 backdrop-blur-sm">
+        <button
+          type="button"
+          onClick={() => window.history.back()}
+          className="ink-label inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 transition-colors hover:bg-accent"
+        >
+          ← Back
+        </button>
+        <Link
+          to="/"
+          className="ink-label inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 transition-colors hover:bg-accent"
+        >
+          Home
+        </Link>
+      </div>
       <header className="text-center">
         <p className="ink-label">InkPark Tattoo Studio</p>
       </header>
