@@ -65,6 +65,21 @@ function AuthPage() {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-6 py-12">
+      <div className="fixed inset-x-0 top-0 z-10 mx-auto flex w-full max-w-md items-center justify-between px-6 py-4">
+        <button
+          type="button"
+          onClick={() => window.history.back()}
+          className="ink-label inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 transition-colors hover:bg-accent"
+        >
+          ← Back
+        </button>
+        <Link
+          to="/"
+          className="ink-label inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 transition-colors hover:bg-accent"
+        >
+          Home
+        </Link>
+      </div>
       <p className="ink-label">InkPark Tattoo Studio</p>
       <h1 className="mt-3 text-4xl text-foreground">Staff access</h1>
       <p className="mt-2 text-sm text-muted-foreground">
