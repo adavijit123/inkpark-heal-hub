@@ -32,7 +32,43 @@ export type PortalHealingPhoto = {
   artist_feedback: string | null;
   artist_feedback_at: string | null;
   client_reaction: string | null;
+  flagged: boolean;
+  concern: string | null;
 };
+
+export const CONCERN_OPTIONS = [
+  "Redness is getting worse",
+  "Pain is increasing",
+  "Fluid, pus or swelling",
+  "Fever or feeling unwell",
+  "Something else worries me",
+] as const;
+
+const ALERT_WORDS = [
+  "worse",
+  "worsening",
+  "increasing",
+  "spreading",
+  "pus",
+  "fever",
+  "infection",
+  "infected",
+  "swollen",
+  "swelling",
+  "redness",
+  "pain",
+  "bleeding",
+  "rash",
+  "doctor",
+  "concern",
+  "unwell",
+];
+
+export function looksConcerning(text: string | null | undefined) {
+  if (!text) return false;
+  const t = text.toLowerCase();
+  return ALERT_WORDS.some((w) => t.includes(w));
+}
 
 
 export type PortalData = {
@@ -104,7 +140,7 @@ export async function loadPortal(token: string): Promise<PortalData> {
       .order("sort_order"),
     supabaseAdmin
       .from("healing_photos")
-      .select("id, day_marker, note, created_at, storage_path, ai_feedback, ai_status, artist_feedback, artist_feedback_at, client_reaction")
+      .select("id, day_marker, note, created_at, storage_path, ai_feedback, ai_status, artist_feedback, artist_feedback_at, client_reaction, flagged, concern")
       .eq("tattoo_id", tattoo.id)
       .order("day_marker"),
     supabaseAdmin
@@ -126,6 +162,8 @@ export async function loadPortal(token: string): Promise<PortalData> {
       artist_feedback: p.artist_feedback,
       artist_feedback_at: p.artist_feedback_at,
       client_reaction: p.client_reaction,
+      flagged: p.flagged,
+      concern: p.concern,
     })),
   );
 
