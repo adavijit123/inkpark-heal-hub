@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import {
   addHealingPhoto,
   getPortal,
@@ -12,6 +12,7 @@ import {
   sendSupport,
   startPortalUpload,
   toggleStageFollowed,
+  updateReminderSetting,
 } from "@/lib/portal.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -172,7 +173,7 @@ function Portal() {
               Day {day} of healing{artist ? ` · ${artist.name}` : ""}
             </p>
           </div>
-          <p className="ink-label shrink-0 pt-1">Today's reminder</p>
+          {tattoo.reminders_enabled ? <p className="ink-label shrink-0 pt-1">Today's reminder</p> : null}
         </div>
 
         <dl className="mt-5 grid grid-cols-3 gap-4">
@@ -273,6 +274,8 @@ function Portal() {
 
 
 
+      <ReminderSettings token={token} enabled={tattoo.reminders_enabled} day={day} nextDay={nextDay} qc={qc} />
+
       <SupportBox token={token} wa={wa} />
 
       {healed ? <PostHealing token={token} settings={settings} tattoo={tattoo} qc={qc} /> : null}
@@ -292,6 +295,127 @@ function Portal() {
         </a>
       ) : null}
     </main>
+  );
+}
+
+function ReminderSettings({
+  token,
+  enabled,
+  day,
+  nextDay,
+  qc,
+}: {
+  token: string;
+  enabled: boolean;
+  day: number;
+  nextDay: number | null;
+  qc: ReturnType<typeof useQueryClient>;
+}) {
+  const save = useServerFn(updateReminderSetting);
+  const [pending, setPending] = useState(false);
+  const [device, setDevice] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setDevice(localStorage.getItem(`inkpark-device-reminders-${token}`) === "on");
+  }, [token]);
+
+  const toggle = async () => {
+    setPending(true);
+    try {
+      await save({ data: { token, enabled: !enabled } });
+      await qc.invalidateQueries({ queryKey: ["portal", token] });
+      toast.success(!enabled ? "Day reminders turned on" : "Day reminders turned off");
+    } catch {
+      toast.error("Could not save your reminder setting");
+    } finally {
+      setPending(false);
+    }
+  };
+
+  const toggleDevice = async () => {
+    if (device) {
+      localStorage.removeItem(`inkpark-device-reminders-${token}`);
+      setDevice(false);
+      return;
+    }
+    if (typeof Notification === "undefined") {
+      toast.error("This device doesn't support notifications");
+      return;
+    }
+    const perm = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
+    if (perm !== "granted") {
+      toast.error("Notifications are blocked in your browser settings");
+      return;
+    }
+    localStorage.setItem(`inkpark-device-reminders-${token}`, "on");
+    setDevice(true);
+    new Notification("InkPark aftercare", {
+      body: nextDay ? `You're on day ${day}. Next checkpoint: day ${nextDay}.` : `You're on day ${day} of healing.`,
+    });
+  };
+
+  return (
+    <section className="ink-card mt-8 p-5">
+      <h2 className="text-2xl text-foreground">Reminder settings</h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Day reminders nudge you on checkpoint days (1, 2, 3, 5, 7, 15, 30).
+      </p>
+
+      <div className="mt-5 flex items-center justify-between gap-4 border-t border-border pt-4">
+        <div>
+          <p className="ink-label">Day reminders</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {enabled ? "On — we'll remind you on each checkpoint day." : "Off — no reminders will be sent."}
+          </p>
+        </div>
+        <Switch on={enabled} disabled={pending} onToggle={toggle} label="Day reminders" />
+      </div>
+
+      <div className="mt-4 flex items-center justify-between gap-4 border-t border-border pt-4">
+        <div>
+          <p className="ink-label">Notifications on this device</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {device ? "On — this browser can show reminder pop-ups." : "Off — allow pop-up reminders in this browser."}
+          </p>
+        </div>
+        <Switch on={device} onToggle={toggleDevice} label="Device notifications" />
+      </div>
+    </section>
+  );
+}
+
+function Switch({
+  on,
+  onToggle,
+  disabled,
+  label,
+}: {
+  on: boolean;
+  onToggle: () => void;
+  disabled?: boolean;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
+      disabled={disabled}
+      onClick={onToggle}
+      className={cn(
+        "relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border transition-colors disabled:opacity-50",
+        on ? "border-foreground bg-foreground" : "border-border bg-background",
+      )}
+    >
+      <span
+        className={cn(
+          "inline-block h-5 w-5 rounded-full transition-transform",
+          on ? "translate-x-6 bg-background" : "translate-x-1 bg-foreground/40",
+        )}
+      />
+    </button>
   );
 }
 
