@@ -586,31 +586,38 @@ function PhotoTracker({
                             </p>
                           ) : null}
                           {p.note ? <p className="text-sm text-foreground">“{p.note}”</p> : null}
-                          <button
-                            onClick={async () => {
-                              await remove({ data: { token, photoId: p.id } });
-                              qc.invalidateQueries({ queryKey: ["portal", token] });
-                            }}
-                            className="ink-label mt-2 underline"
-                          >
-                            Delete photo
-                          </button>
-                          <label
-                            className={`ink-label mt-2 inline-flex cursor-pointer items-center rounded-md border border-border px-3 py-2 uppercase transition-colors hover:bg-muted ${busy === marker ? "pointer-events-none opacity-50" : ""}`}
-                          >
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              disabled={busy === marker}
-                              onChange={(e) => {
-                                const f = e.target.files?.[0];
-                                if (f) upload(f, marker);
-                                e.currentTarget.value = "";
+                          <div className="mt-3 flex items-center gap-2.5">
+                            <button
+                              onClick={async () => {
+                                await remove({ data: { token, photoId: p.id } });
+                                qc.invalidateQueries({ queryKey: ["portal", token] });
                               }}
-                            />
-                            Add another photo
-                          </label>
+                              aria-label="Delete photo"
+                              className="flex size-9 items-center justify-center rounded-lg text-destructive transition-colors hover:bg-destructive/10"
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-4">
+                                <path d="M3 6h18" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                              </svg>
+                            </button>
+                            <label
+                              className={`ink-label inline-flex cursor-pointer items-center rounded-full border border-foreground/40 px-4 py-2 tracking-[0.12em] transition-colors hover:bg-muted ${busy === marker ? "pointer-events-none opacity-50" : ""}`}
+                            >
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                disabled={busy === marker}
+                                onChange={(e) => {
+                                  const f = e.target.files?.[0];
+                                  if (f) upload(f, marker);
+                                  e.currentTarget.value = "";
+                                }}
+                              />
+                              Add another photo
+                            </label>
+                          </div>
                         </div>
                       </div>
 
