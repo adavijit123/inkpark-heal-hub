@@ -348,6 +348,7 @@ export type Database = {
           photo_path: string | null
           placement: string | null
           rebooking_requested: boolean
+          reminders_enabled: boolean
           review_submitted: boolean
           style: string | null
           tattoo_date: string
@@ -362,6 +363,7 @@ export type Database = {
           photo_path?: string | null
           placement?: string | null
           rebooking_requested?: boolean
+          reminders_enabled?: boolean
           review_submitted?: boolean
           style?: string | null
           tattoo_date?: string
@@ -376,6 +378,7 @@ export type Database = {
           photo_path?: string | null
           placement?: string | null
           rebooking_requested?: boolean
+          reminders_enabled?: boolean
           review_submitted?: boolean
           style?: string | null
           tattoo_date?: string

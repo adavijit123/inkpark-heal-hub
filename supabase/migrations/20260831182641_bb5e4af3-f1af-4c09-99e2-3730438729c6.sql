@@ -1,0 +1,1 @@
+ALTER TABLE public.tattoos ADD COLUMN IF NOT EXISTS reminders_enabled boolean NOT NULL DEFAULT true;
