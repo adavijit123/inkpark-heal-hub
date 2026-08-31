@@ -173,7 +173,11 @@ function Portal() {
               Day {day} of healing{artist ? ` · ${artist.name}` : ""}
             </p>
           </div>
-          {tattoo.reminders_enabled ? <p className="ink-label shrink-0 pt-1">Today's reminder</p> : null}
+          <DayReminderBell
+            token={token}
+            enabled={tattoo.reminders_enabled}
+            onSaved={() => qc.invalidateQueries({ queryKey: ["portal", token] })}
+          />
         </div>
 
         <dl className="mt-5 grid grid-cols-3 gap-4">
@@ -274,7 +278,7 @@ function Portal() {
 
 
 
-      <ReminderSettings token={token} enabled={tattoo.reminders_enabled} day={day} nextDay={nextDay} qc={qc} />
+      
 
       <SupportBox token={token} wa={wa} />
 
