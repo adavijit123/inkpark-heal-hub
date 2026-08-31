@@ -718,26 +718,36 @@ function SupportBox({ token, wa }: { token: string; wa: string | null }) {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  function handleSend() {
+    const text = message.trim();
+    if (wa) {
+      const url = text ? `${wa}${wa.includes("?") ? "&" : "?"}text=${encodeURIComponent(text)}` : wa;
+      window.open(url, "_blank", "noreferrer");
+      if (text) mutation.mutate(text);
+      return;
+    }
+    mutation.mutate(text);
+  }
+
   return (
     <section className="mt-10">
-      <h2 className="text-2xl text-foreground">Need help?</h2>
-      <div className="ink-card mt-4 space-y-3 p-5">
+      <h2 className="ink-section-title text-2xl uppercase tracking-wide text-foreground">Need help?</h2>
+      <div className="ink-card mt-4 space-y-4 rounded-2xl p-4">
         <Textarea
-          rows={3}
+          rows={4}
           value={message}
           placeholder="Describe what you're seeing…"
           onChange={(e) => setMessage(e.target.value)}
+          className="rounded-xl border-border/70 bg-background shadow-sm"
         />
-        <Button className="w-full" disabled={mutation.isPending} onClick={() => mutation.mutate(message)}>
-          Send to InkPark
-        </Button>
-        {wa ? (
-          <Button variant="outline" className="w-full" asChild>
-            <a href={wa} target="_blank" rel="noreferrer">
-              Or message on WhatsApp
-            </a>
-          </Button>
-        ) : null}
+        <button
+          type="button"
+          className="w-full rounded-full bg-foreground py-3.5 text-sm font-medium tracking-wide text-background transition-colors hover:bg-foreground/90 disabled:opacity-50"
+          disabled={mutation.isPending}
+          onClick={handleSend}
+        >
+          {wa ? "message on WhatsApp" : "Send to InkPark"}
+        </button>
       </div>
     </section>
   );
