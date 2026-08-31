@@ -22,6 +22,8 @@ import { toast } from "sonner";
 import { BN_LABELS, BN_STAGES } from "@/lib/aftercare-bn";
 import { FAQS, searchFaqs, type Faq } from "@/lib/aftercare-faq";
 import { cn } from "@/lib/utils";
+import { CONCERN_OPTIONS } from "@/lib/portal-shared";
+
 
 
 const HEALING_DAYS = [1, 2, 3, 5, 7, 15, 30];
@@ -44,6 +46,8 @@ type TrackerPhoto = {
   ai_status: string;
   artist_feedback: string | null;
   client_reaction: string | null;
+  flagged: boolean;
+  concern: string | null;
 };
 
 
