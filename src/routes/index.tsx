@@ -113,8 +113,17 @@ function Landing() {
         })}
       </div>
 
+      <div className="mt-auto pt-12">
+        <Link
+          to="/auth"
+          className="ink-label inline-flex items-center gap-2 underline underline-offset-4 hover:text-foreground"
+        >
+          Studio staff login
+        </Link>
+      </div>
+
       <section className="ink-card mt-8 space-y-3 p-5">
-        <h2 className="text-lg leading-none text-foreground">Already have a link?</h2>
+        <h2 className="text-lg leading-none text-foreground">Client aftercare link</h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
           Paste the aftercare link or code your artist gave you.
         </p>
@@ -131,15 +140,6 @@ function Landing() {
           Open my aftercare page
         </Button>
       </section>
-
-      <div className="mt-auto pt-12">
-        <Link
-          to="/auth"
-          className="ink-label inline-flex items-center gap-2 underline underline-offset-4 hover:text-foreground"
-        >
-          Studio staff login
-        </Link>
-      </div>
     </main>
   );
 }
