@@ -524,6 +524,22 @@ function Instruction({ label, text }: { label: string; text: string | null }) {
   );
 }
 
+function StatusBadge({ done }: { done: boolean }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-semibold tracking-[0.12em] uppercase",
+        done
+          ? "border-foreground bg-foreground text-background"
+          : "border-border text-muted-foreground"
+      )}
+    >
+      <span className={cn("size-1.5 rounded-full", done ? "bg-background" : "border border-current")} />
+      {done ? "Done" : "Pending"}
+    </span>
+  );
+}
+
 function PhotoTracker({
   token,
   photos,
@@ -740,8 +756,11 @@ function PhotoTracker({
                       </div>
 
                       <div className="rounded-md border border-border p-3">
-                        <div className="flex flex-wrap items-baseline justify-between gap-2">
-                          <p className="ink-label">AI healing check</p>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <p className="ink-label">AI healing check</p>
+                            <StatusBadge done={!!p.ai_feedback} />
+                          </div>
                           {p.ai_feedback && stamp(p.ai_feedback_at) ? (
                             <span className="text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
                               {stamp(p.ai_feedback_at)}
@@ -764,8 +783,11 @@ function PhotoTracker({
                       </div>
 
                       <div className="rounded-md border border-border p-3">
-                        <div className="flex flex-wrap items-baseline justify-between gap-2">
-                          <p className="ink-label">Artist feedback</p>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <p className="ink-label">Artist feedback</p>
+                            <StatusBadge done={!!p.artist_feedback} />
+                          </div>
                           {p.artist_feedback && stamp(p.artist_feedback_at) ? (
                             <span className="text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
                               {stamp(p.artist_feedback_at)}
