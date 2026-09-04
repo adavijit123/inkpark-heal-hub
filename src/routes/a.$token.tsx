@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState, type CSSProperties } from "react";
+import { Download, X, ZoomIn, ZoomOut } from "lucide-react";
 import {
   addHealingPhoto,
   getPortal,
