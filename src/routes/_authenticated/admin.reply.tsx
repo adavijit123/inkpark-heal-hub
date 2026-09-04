@@ -42,6 +42,8 @@ type Row = {
   storage_path: string;
   url: string | null;
   clientName: string;
+  clientPhone: string | null;
+  accessToken: string | null;
 };
 
 function stamp(v: string | null) {
@@ -64,7 +66,7 @@ function ReplyPage() {
       const { data, error } = await supabase
         .from("healing_photos")
         .select(
-          "id, day_marker, created_at, note, concern, flagged, ai_feedback, ai_feedback_at, artist_feedback, artist_feedback_at, client_reaction, storage_path, tattoos(clients(full_name))",
+          "id, day_marker, created_at, note, concern, flagged, ai_feedback, ai_feedback_at, artist_feedback, artist_feedback_at, client_reaction, storage_path, tattoos(access_token, clients(full_name, phone))",
         )
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -73,11 +75,16 @@ function ReplyPage() {
           const { data: s } = await supabase.storage
             .from("healing-photos")
             .createSignedUrl(p.storage_path, 3600);
-          const t = p.tattoos as { clients: { full_name: string } | null } | null;
+          const t = p.tattoos as {
+            access_token: string | null;
+            clients: { full_name: string; phone: string | null } | null;
+          } | null;
           return {
             ...p,
             url: s?.signedUrl ?? null,
             clientName: t?.clients?.full_name ?? "Client",
+            clientPhone: t?.clients?.phone ?? null,
+            accessToken: t?.access_token ?? null,
           } as Row;
         }),
       );
@@ -124,6 +131,21 @@ function PhotoReply({ row, onSaved }: { row: Row; onSaved: () => void }) {
   const [saving, setSaving] = useState<"ai" | "artist" | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [zoom, setZoom] = useState(1);
+  const [notify, setNotify] = useState(true);
+
+  const phoneDigits = (row.clientPhone ?? "").replace(/\D/g, "");
+  const canNotify = phoneDigits.length >= 8 && !!row.accessToken;
+
+  function notifyClient(kind: "ai" | "artist", text: string) {
+    if (!canNotify) {
+      toast.message("No WhatsApp number saved for this client");
+      return;
+    }
+    const link = `${window.location.origin}/a/${row.accessToken}`;
+    const label = kind === "ai" ? "AI healing check" : "artist feedback";
+    const message = `Hi ${row.clientName}, your day ${row.day_marker} ${label} from InkPark is ready.\n\n"${text.trim()}"\n\nSee it here: ${link}`;
+    window.open(`https://wa.me/${phoneDigits}?text=${encodeURIComponent(message)}`, "_blank", "noopener");
+  }
 
   async function save(kind: "ai" | "artist") {
     setSaving(kind);
@@ -137,6 +159,8 @@ function PhotoReply({ row, onSaved }: { row: Row; onSaved: () => void }) {
     if (error) toast.error(error.message);
     else {
       toast.success(kind === "ai" ? "AI healing check saved" : "Artist feedback sent to the client page");
+      const text = kind === "ai" ? ai : artist;
+      if (notify && text.trim()) notifyClient(kind, text);
       onSaved();
     }
   }
@@ -180,6 +204,25 @@ function PhotoReply({ row, onSaved }: { row: Row; onSaved: () => void }) {
           ) : null}
         </div>
       </div>
+
+      <label
+        htmlFor={`notify-${row.id}`}
+        className="flex items-center gap-3 rounded-md border border-border p-3"
+      >
+        <input
+          id={`notify-${row.id}`}
+          type="checkbox"
+          className="h-4 w-4 accent-foreground"
+          checked={notify && canNotify}
+          disabled={!canNotify}
+          onChange={(e) => setNotify(e.target.checked)}
+        />
+        <span className="ink-label">
+          {canNotify
+            ? "Notify client on WhatsApp after saving"
+            : "No WhatsApp number saved for this client"}
+        </span>
+      </label>
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
