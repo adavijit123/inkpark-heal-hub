@@ -131,6 +131,21 @@ function PhotoReply({ row, onSaved }: { row: Row; onSaved: () => void }) {
   const [saving, setSaving] = useState<"ai" | "artist" | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [zoom, setZoom] = useState(1);
+  const [notify, setNotify] = useState(true);
+
+  const phoneDigits = (row.clientPhone ?? "").replace(/\D/g, "");
+  const canNotify = phoneDigits.length >= 8 && !!row.accessToken;
+
+  function notifyClient(kind: "ai" | "artist", text: string) {
+    if (!canNotify) {
+      toast.message("No WhatsApp number saved for this client");
+      return;
+    }
+    const link = `${window.location.origin}/a/${row.accessToken}`;
+    const label = kind === "ai" ? "AI healing check" : "artist feedback";
+    const message = `Hi ${row.clientName}, your day ${row.day_marker} ${label} from InkPark is ready.\n\n"${text.trim()}"\n\nSee it here: ${link}`;
+    window.open(`https://wa.me/${phoneDigits}?text=${encodeURIComponent(message)}`, "_blank", "noopener");
+  }
 
   async function save(kind: "ai" | "artist") {
     setSaving(kind);
