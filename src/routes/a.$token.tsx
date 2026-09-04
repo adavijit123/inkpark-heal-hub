@@ -1103,6 +1103,54 @@ function ReactionBar({
   );
 }
 
+function TouchUpBooking({
+  token,
+  bookingUrl,
+  day,
+  qc,
+  alreadyRequested,
+}: {
+  token: string;
+  bookingUrl: string;
+  day: number;
+  qc: ReturnType<typeof useQueryClient>;
+  alreadyRequested: boolean;
+}) {
+  const mark = useServerFn(markPortalStep);
+  const [busy, setBusy] = useState(false);
+
+  async function book() {
+    if (alreadyRequested) {
+      window.open(bookingUrl, "_blank", "noopener");
+      return;
+    }
+    setBusy(true);
+    try {
+      await mark({ data: { token, action: "rebooking" } });
+      qc.invalidateQueries({ queryKey: ["portal", token] });
+      window.open(bookingUrl, "_blank", "noopener");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not open booking");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="mt-10">
+      <h2 className="text-2xl text-foreground">Ready for a touch-up?</h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        {day > 30
+          ? "Healing is complete — book your touch-up session in one tap."
+          : "Book your touch-up or next session directly with InkPark."}
+      </p>
+      <Button className="mt-4 w-full" onClick={book} disabled={busy}>
+        {alreadyRequested ? "Open booking page ↗" : "Book a touch-up"}
+      </Button>
+    </section>
+  );
+}
+
 function PostHealing({
   token,
   settings,
