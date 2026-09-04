@@ -162,7 +162,7 @@ function Portal() {
     : null;
 
   return (
-    <main className="mx-auto w-full max-w-md px-5 pb-32 pt-10">
+    <main className="mx-auto w-full max-w-md px-5 pb-44 pt-10">
       <div className="fixed inset-x-0 top-0 z-10 mx-auto flex w-full max-w-md items-center justify-between bg-background/90 px-5 py-4 backdrop-blur-sm">
         <button
           type="button"
