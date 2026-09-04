@@ -1050,18 +1050,15 @@ function KnowledgeSection({ wa }: { wa: string | null }) {
 
   return (
     <section className="mt-8">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-2xl text-foreground">
-            {lang === "bn" ? FAQ_BN_LABELS.title : "Aftercare Knowledge Hub"}
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {lang === "bn"
-              ? FAQ_BN_LABELS.subtitle
-              : "Straight answers to the questions every client asks while healing."}
-          </p>
-        </div>
-        <LangToggle lang={lang} setLang={setLang} />
+      <div>
+        <h2 className="text-2xl text-foreground">
+          {lang === "bn" ? FAQ_BN_LABELS.title : "Aftercare Knowledge Hub"}
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {lang === "bn"
+            ? FAQ_BN_LABELS.subtitle
+            : "Straight answers to the questions every client asks while healing."}
+        </p>
       </div>
 
       <Input
@@ -1071,15 +1068,18 @@ function KnowledgeSection({ wa }: { wa: string | null }) {
         aria-label="Search aftercare questions"
         className="mt-4 h-auto rounded-md border-border bg-transparent px-4 py-3 text-sm"
       />
-      <p className="ink-label mt-2">
-        {query.trim()
-          ? lang === "bn"
-            ? FAQ_BN_LABELS.results(results.length)
-            : `${results.length} result${results.length === 1 ? "" : "s"}`
-          : lang === "bn"
-            ? FAQ_BN_LABELS.popular
-            : "Popular questions"}
-      </p>
+      <div className="mt-2 flex items-center justify-between gap-2">
+        <p className="ink-label">
+          {query.trim()
+            ? lang === "bn"
+              ? FAQ_BN_LABELS.results(results.length)
+              : `${results.length} result${results.length === 1 ? "" : "s"}`
+            : lang === "bn"
+              ? FAQ_BN_LABELS.popular
+              : "Popular questions"}
+        </p>
+        <LangToggle lang={lang} setLang={setLang} />
+      </div>
 
       <div className="ink-card mt-3 divide-y divide-border">
         {results.length === 0 ? (
