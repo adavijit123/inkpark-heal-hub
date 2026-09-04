@@ -1037,39 +1037,56 @@ function PostHealing({
 function KnowledgeSection({ wa }: { wa: string | null }) {
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [lang, setLang] = useState<"en" | "bn">("en");
   const waBase = wa ? (wa.split("?")[0] ?? null) : null;
 
   const results = useMemo(() => searchFaqs(query), [query]);
   const open = FAQS.find((f) => f.id === openId) ?? null;
 
   if (open) {
-    return <KnowledgeAnswer faq={open} waBase={waBase} onBack={() => setOpenId(null)} />;
+    return <KnowledgeAnswer faq={open} waBase={waBase} lang={lang} setLang={setLang} onBack={() => setOpenId(null)} />;
   }
 
   return (
     <section className="mt-8">
-      <h2 className="text-2xl text-foreground">Aftercare Knowledge Hub</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Straight answers to the questions every client asks while healing.
-      </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-2xl text-foreground">
+            {lang === "bn" ? FAQ_BN_LABELS.title : "Aftercare Knowledge Hub"}
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {lang === "bn"
+              ? FAQ_BN_LABELS.subtitle
+              : "Straight answers to the questions every client asks while healing."}
+          </p>
+        </div>
+        <LangToggle lang={lang} setLang={setLang} />
+      </div>
 
       <Input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search your aftercare question…"
+        placeholder={lang === "bn" ? FAQ_BN_LABELS.searchPlaceholder : "Search your aftercare question…"}
         aria-label="Search aftercare questions"
         className="mt-4 h-auto rounded-md border-border bg-transparent px-4 py-3 text-sm"
       />
       <p className="ink-label mt-2">
-        {query.trim() ? `${results.length} result${results.length === 1 ? "" : "s"}` : "Popular questions"}
+        {query.trim()
+          ? lang === "bn"
+            ? FAQ_BN_LABELS.results(results.length)
+            : `${results.length} result${results.length === 1 ? "" : "s"}`
+          : lang === "bn"
+            ? FAQ_BN_LABELS.popular
+            : "Popular questions"}
       </p>
 
       <div className="ink-card mt-3 divide-y divide-border">
         {results.length === 0 ? (
           <div className="p-5">
             <p className="text-sm text-muted-foreground">
-              No matching answer. Try words like “gym”, “water”, “sun”, “itchy” or “peeling” — or message
-              the studio directly.
+              {lang === "bn"
+                ? FAQ_BN_LABELS.noMatch
+                : "No matching answer. Try words like “gym”, “water”, “sun”, “itchy” or “peeling” — or message the studio directly."}
             </p>
           </div>
         ) : (
@@ -1083,7 +1100,9 @@ function KnowledgeSection({ wa }: { wa: string | null }) {
               <span className="font-display text-lg text-muted-foreground">
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <span className="flex-1 text-base text-foreground">{f.question}</span>
+              <span className="flex-1 text-base text-foreground">
+                {lang === "bn" ? (FAQ_BN[f.id]?.question ?? f.question) : f.question}
+              </span>
               <span className="ink-label shrink-0">→</span>
             </button>
           ))
