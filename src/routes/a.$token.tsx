@@ -293,9 +293,15 @@ function Portal() {
 
       {openSection === "knowledge" ? <KnowledgeSection wa={wa} /> : null}
 
-
-
-      
+      {settings?.booking_url ? (
+        <TouchUpBooking
+          token={token}
+          bookingUrl={settings.booking_url}
+          day={day}
+          qc={qc}
+          alreadyRequested={tattoo.rebooking_requested}
+        />
+      ) : null}
 
       <SupportBox token={token} wa={wa} />
 
