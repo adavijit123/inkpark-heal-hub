@@ -524,6 +524,22 @@ function Instruction({ label, text }: { label: string; text: string | null }) {
   );
 }
 
+function StatusBadge({ done }: { done: boolean }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-semibold tracking-[0.12em] uppercase",
+        done
+          ? "border-foreground bg-foreground text-background"
+          : "border-border text-muted-foreground"
+      )}
+    >
+      <span className={cn("size-1.5 rounded-full", done ? "bg-background" : "border border-current")} />
+      {done ? "Done" : "Pending"}
+    </span>
+  );
+}
+
 function PhotoTracker({
   token,
   photos,
