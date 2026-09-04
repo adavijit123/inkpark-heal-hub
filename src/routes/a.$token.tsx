@@ -740,8 +740,11 @@ function PhotoTracker({
                       </div>
 
                       <div className="rounded-md border border-border p-3">
-                        <div className="flex flex-wrap items-baseline justify-between gap-2">
-                          <p className="ink-label">AI healing check</p>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <p className="ink-label">AI healing check</p>
+                            <StatusBadge done={!!p.ai_feedback} />
+                          </div>
                           {p.ai_feedback && stamp(p.ai_feedback_at) ? (
                             <span className="text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
                               {stamp(p.ai_feedback_at)}
@@ -764,8 +767,11 @@ function PhotoTracker({
                       </div>
 
                       <div className="rounded-md border border-border p-3">
-                        <div className="flex flex-wrap items-baseline justify-between gap-2">
-                          <p className="ink-label">Artist feedback</p>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <p className="ink-label">Artist feedback</p>
+                            <StatusBadge done={!!p.artist_feedback} />
+                          </div>
                           {p.artist_feedback && stamp(p.artist_feedback_at) ? (
                             <span className="text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
                               {stamp(p.artist_feedback_at)}
