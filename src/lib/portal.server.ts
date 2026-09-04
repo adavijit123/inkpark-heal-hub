@@ -28,6 +28,7 @@ export type PortalHealingPhoto = {
   created_at: string;
   url: string | null;
   ai_feedback: string | null;
+  ai_feedback_at: string | null;
   ai_status: string;
   artist_feedback: string | null;
   artist_feedback_at: string | null;
@@ -133,7 +134,7 @@ export async function loadPortal(token: string): Promise<PortalData> {
       .order("sort_order"),
     supabaseAdmin
       .from("healing_photos")
-      .select("id, day_marker, note, created_at, storage_path, ai_feedback, ai_status, artist_feedback, artist_feedback_at, client_reaction, flagged, concern")
+      .select("id, day_marker, note, created_at, storage_path, ai_feedback, ai_feedback_at, ai_status, artist_feedback, artist_feedback_at, client_reaction, flagged, concern")
       .eq("tattoo_id", tattoo.id)
       .order("day_marker"),
     supabaseAdmin
@@ -151,6 +152,7 @@ export async function loadPortal(token: string): Promise<PortalData> {
       created_at: p.created_at,
       url: await signed("healing-photos", p.storage_path),
       ai_feedback: p.ai_feedback,
+      ai_feedback_at: p.ai_feedback_at,
       ai_status: p.ai_status,
       artist_feedback: p.artist_feedback,
       artist_feedback_at: p.artist_feedback_at,
@@ -362,6 +364,7 @@ export async function requestAiFeedback(token: string, photoId: string) {
     .from("healing_photos")
     .update({
       ai_feedback: text,
+      ai_feedback_at: new Date().toISOString(),
       ai_status: "done",
       ...(aiFlag
         ? { flagged: true, concern: photo.note ? photo.note : "AI check noticed something that needs attention" }
