@@ -128,6 +128,7 @@ export type Database = {
       healing_photos: {
         Row: {
           ai_feedback: string | null
+          ai_feedback_at: string | null
           ai_status: string
           artist_feedback: string | null
           artist_feedback_at: string | null
@@ -143,6 +144,7 @@ export type Database = {
         }
         Insert: {
           ai_feedback?: string | null
+          ai_feedback_at?: string | null
           ai_status?: string
           artist_feedback?: string | null
           artist_feedback_at?: string | null
@@ -158,6 +160,7 @@ export type Database = {
         }
         Update: {
           ai_feedback?: string | null
+          ai_feedback_at?: string | null
           ai_status?: string
           artist_feedback?: string | null
           artist_feedback_at?: string | null

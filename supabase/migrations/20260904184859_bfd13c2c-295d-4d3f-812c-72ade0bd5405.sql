@@ -1,0 +1,1 @@
+ALTER TABLE public.healing_photos ADD COLUMN IF NOT EXISTS ai_feedback_at timestamp with time zone;
