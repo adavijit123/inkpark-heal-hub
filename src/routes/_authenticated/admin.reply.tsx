@@ -42,6 +42,8 @@ type Row = {
   storage_path: string;
   url: string | null;
   clientName: string;
+  clientPhone: string | null;
+  accessToken: string | null;
 };
 
 function stamp(v: string | null) {
