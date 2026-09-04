@@ -205,6 +205,25 @@ function PhotoReply({ row, onSaved }: { row: Row; onSaved: () => void }) {
         </div>
       </div>
 
+      <label
+        htmlFor={`notify-${row.id}`}
+        className="flex items-center gap-3 rounded-md border border-border p-3"
+      >
+        <input
+          id={`notify-${row.id}`}
+          type="checkbox"
+          className="h-4 w-4 accent-foreground"
+          checked={notify && canNotify}
+          disabled={!canNotify}
+          onChange={(e) => setNotify(e.target.checked)}
+        />
+        <span className="ink-label">
+          {canNotify
+            ? "Notify client on WhatsApp after saving"
+            : "No WhatsApp number saved for this client"}
+        </span>
+      </label>
+
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label htmlFor={`ai-${row.id}`} className="ink-label">
