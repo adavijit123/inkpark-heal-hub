@@ -124,7 +124,23 @@ function PhotoReply({ row, onSaved }: { row: Row; onSaved: () => void }) {
   const [saving, setSaving] = useState<"ai" | "artist" | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [zoom, setZoom] = useState(1);
-...
+
+  async function save(kind: "ai" | "artist") {
+    setSaving(kind);
+    const now = new Date().toISOString();
+    const patch =
+      kind === "ai"
+        ? { ai_feedback: ai.trim() || null, ai_feedback_at: ai.trim() ? now : null, ai_status: ai.trim() ? "done" : "pending" }
+        : { artist_feedback: artist.trim() || null, artist_feedback_at: artist.trim() ? now : null };
+    const { error } = await supabase.from("healing_photos").update(patch).eq("id", row.id);
+    setSaving(null);
+    if (error) toast.error(error.message);
+    else {
+      toast.success(kind === "ai" ? "AI healing check saved" : "Artist feedback sent to the client page");
+      onSaved();
+    }
+  }
+
   return (
     <section className="ink-card space-y-4 p-5">
       <div className="flex gap-3">
