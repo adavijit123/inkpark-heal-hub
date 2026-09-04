@@ -547,11 +547,13 @@ function PhotoTracker({
   photos,
   qc,
   day,
+  clientName,
 }: {
   token: string;
   photos: TrackerPhoto[];
   qc: ReturnType<typeof useQueryClient>;
   day: number;
+  clientName: string;
 }) {
   const startUpload = useServerFn(startPortalUpload);
   const save = useServerFn(addHealingPhoto);
