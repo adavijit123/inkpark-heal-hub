@@ -29,6 +29,18 @@ import { CONCERN_OPTIONS } from "@/lib/portal-shared";
 
 const HEALING_DAYS = [1, 2, 3, 5, 7, 15, 30];
 
+function stamp(iso: string | null | undefined) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleString(undefined, {
+    day: "2-digit",
+    month: "short",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 function currentMarker(day: number) {
   const due = HEALING_DAYS.filter((d) => d <= day);
   return due.length ? due[due.length - 1] : HEALING_DAYS[0];
@@ -43,9 +55,12 @@ type TrackerPhoto = {
   day_marker: number;
   note: string | null;
   url: string | null;
+  created_at: string;
   ai_feedback: string | null;
+  ai_feedback_at: string | null;
   ai_status: string;
   artist_feedback: string | null;
+  artist_feedback_at: string | null;
   client_reaction: string | null;
   flagged: boolean;
   concern: string | null;
@@ -683,7 +698,12 @@ function PhotoTracker({
                               ⚠️ Concern reported{p.concern ? ` — ${p.concern}` : ""}
                             </p>
                           ) : null}
-                          {p.note ? <p className="text-sm text-foreground">“{p.note}”</p> : null}
+                          {stamp(p.created_at) ? (
+                            <p className="text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
+                              Uploaded {stamp(p.created_at)}
+                            </p>
+                          ) : null}
+                          {p.note ? <p className="mt-1 text-sm text-foreground">“{p.note}”</p> : null}
                           <div className="mt-3 flex items-center gap-2.5">
                             <button
                               onClick={async () => {
@@ -720,7 +740,14 @@ function PhotoTracker({
                       </div>
 
                       <div className="rounded-md border border-border p-3">
-                        <p className="ink-label">AI healing check</p>
+                        <div className="flex flex-wrap items-baseline justify-between gap-2">
+                          <p className="ink-label">AI healing check</p>
+                          {p.ai_feedback && stamp(p.ai_feedback_at) ? (
+                            <span className="text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
+                              {stamp(p.ai_feedback_at)}
+                            </span>
+                          ) : null}
+                        </div>
                         {p.ai_feedback ? (
                           <p className="mt-2 whitespace-pre-line text-sm text-foreground">{p.ai_feedback}</p>
                         ) : (
@@ -737,7 +764,14 @@ function PhotoTracker({
                       </div>
 
                       <div className="rounded-md border border-border p-3">
-                        <p className="ink-label">Artist feedback</p>
+                        <div className="flex flex-wrap items-baseline justify-between gap-2">
+                          <p className="ink-label">Artist feedback</p>
+                          {p.artist_feedback && stamp(p.artist_feedback_at) ? (
+                            <span className="text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
+                              {stamp(p.artist_feedback_at)}
+                            </span>
+                          ) : null}
+                        </div>
                         <p className="mt-2 text-sm text-foreground">
                           {p.artist_feedback ?? "Your artist hasn't replied to this photo yet."}
                         </p>
