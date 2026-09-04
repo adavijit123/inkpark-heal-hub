@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ATokenRouteImport } from './routes/a.$token'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminKnowledgeRouteImport } from './routes/_authenticated/admin.knowledge'
+import { Route as AuthenticatedAdminReplyRouteImport } from './routes/_authenticated/admin.reply'
 import { Route as AuthenticatedAdminTattooIdRouteImport } from './routes/_authenticated/admin.tattoo.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -47,6 +48,11 @@ const AuthenticatedAdminKnowledgeRoute =
     path: '/admin/knowledge',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminReplyRoute = AuthenticatedAdminReplyRouteImport.update({
+  id: '/admin/reply',
+  path: '/admin/reply',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminTattooIdRoute =
   AuthenticatedAdminTattooIdRouteImport.update({
     id: '/admin/tattoo/$id',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/a/$token': typeof ATokenRoute
   '/admin/knowledge': typeof AuthenticatedAdminKnowledgeRoute
+  '/admin/reply': typeof AuthenticatedAdminReplyRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/tattoo/$id': typeof AuthenticatedAdminTattooIdRoute
 }
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/a/$token': typeof ATokenRoute
   '/admin/knowledge': typeof AuthenticatedAdminKnowledgeRoute
+  '/admin/reply': typeof AuthenticatedAdminReplyRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/tattoo/$id': typeof AuthenticatedAdminTattooIdRoute
 }
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/a/$token': typeof ATokenRoute
   '/_authenticated/admin/knowledge': typeof AuthenticatedAdminKnowledgeRoute
+  '/_authenticated/admin/reply': typeof AuthenticatedAdminReplyRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/tattoo/$id': typeof AuthenticatedAdminTattooIdRoute
 }
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/a/$token'
     | '/admin/knowledge'
+    | '/admin/reply'
     | '/admin/'
     | '/admin/tattoo/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -95,6 +105,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/a/$token'
     | '/admin/knowledge'
+    | '/admin/reply'
     | '/admin'
     | '/admin/tattoo/$id'
   id:
@@ -104,6 +115,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/a/$token'
     | '/_authenticated/admin/knowledge'
+    | '/_authenticated/admin/reply'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/tattoo/$id'
   fileRoutesById: FileRoutesById
@@ -159,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminKnowledgeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/reply': {
+      id: '/_authenticated/admin/reply'
+      path: '/admin/reply'
+      fullPath: '/admin/reply'
+      preLoaderRoute: typeof AuthenticatedAdminReplyRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/tattoo/$id': {
       id: '/_authenticated/admin/tattoo/$id'
       path: '/admin/tattoo/$id'
@@ -171,12 +190,14 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminKnowledgeRoute: typeof AuthenticatedAdminKnowledgeRoute
+  AuthenticatedAdminReplyRoute: typeof AuthenticatedAdminReplyRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminTattooIdRoute: typeof AuthenticatedAdminTattooIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminKnowledgeRoute: AuthenticatedAdminKnowledgeRoute,
+  AuthenticatedAdminReplyRoute: AuthenticatedAdminReplyRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedAdminTattooIdRoute: AuthenticatedAdminTattooIdRoute,
 }
