@@ -22,6 +22,7 @@ import { UploadZone } from "@/components/UploadZone";
 import { toast } from "sonner";
 import { BN_LABELS, BN_STAGES } from "@/lib/aftercare-bn";
 import { FAQS, searchFaqs, type Faq } from "@/lib/aftercare-faq";
+import { FAQ_BN, FAQ_BN_LABELS } from "@/lib/aftercare-faq-bn";
 import { cn } from "@/lib/utils";
 import { CONCERN_OPTIONS } from "@/lib/portal-shared";
 
@@ -1037,39 +1038,56 @@ function PostHealing({
 function KnowledgeSection({ wa }: { wa: string | null }) {
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [lang, setLang] = useState<"en" | "bn">("en");
   const waBase = wa ? (wa.split("?")[0] ?? null) : null;
 
   const results = useMemo(() => searchFaqs(query), [query]);
   const open = FAQS.find((f) => f.id === openId) ?? null;
 
   if (open) {
-    return <KnowledgeAnswer faq={open} waBase={waBase} onBack={() => setOpenId(null)} />;
+    return <KnowledgeAnswer faq={open} waBase={waBase} lang={lang} setLang={setLang} onBack={() => setOpenId(null)} />;
   }
 
   return (
     <section className="mt-8">
-      <h2 className="text-2xl text-foreground">Aftercare Knowledge Hub</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Straight answers to the questions every client asks while healing.
-      </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-2xl text-foreground">
+            {lang === "bn" ? FAQ_BN_LABELS.title : "Aftercare Knowledge Hub"}
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {lang === "bn"
+              ? FAQ_BN_LABELS.subtitle
+              : "Straight answers to the questions every client asks while healing."}
+          </p>
+        </div>
+        <LangToggle lang={lang} setLang={setLang} />
+      </div>
 
       <Input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search your aftercare question…"
+        placeholder={lang === "bn" ? FAQ_BN_LABELS.searchPlaceholder : "Search your aftercare question…"}
         aria-label="Search aftercare questions"
         className="mt-4 h-auto rounded-md border-border bg-transparent px-4 py-3 text-sm"
       />
       <p className="ink-label mt-2">
-        {query.trim() ? `${results.length} result${results.length === 1 ? "" : "s"}` : "Popular questions"}
+        {query.trim()
+          ? lang === "bn"
+            ? FAQ_BN_LABELS.results(results.length)
+            : `${results.length} result${results.length === 1 ? "" : "s"}`
+          : lang === "bn"
+            ? FAQ_BN_LABELS.popular
+            : "Popular questions"}
       </p>
 
       <div className="ink-card mt-3 divide-y divide-border">
         {results.length === 0 ? (
           <div className="p-5">
             <p className="text-sm text-muted-foreground">
-              No matching answer. Try words like “gym”, “water”, “sun”, “itchy” or “peeling” — or message
-              the studio directly.
+              {lang === "bn"
+                ? FAQ_BN_LABELS.noMatch
+                : "No matching answer. Try words like “gym”, “water”, “sun”, “itchy” or “peeling” — or message the studio directly."}
             </p>
           </div>
         ) : (
@@ -1083,7 +1101,9 @@ function KnowledgeSection({ wa }: { wa: string | null }) {
               <span className="font-display text-lg text-muted-foreground">
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <span className="flex-1 text-base text-foreground">{f.question}</span>
+              <span className="flex-1 text-base text-foreground">
+                {lang === "bn" ? (FAQ_BN[f.id]?.question ?? f.question) : f.question}
+              </span>
               <span className="ink-label shrink-0">→</span>
             </button>
           ))
@@ -1096,10 +1116,14 @@ function KnowledgeSection({ wa }: { wa: string | null }) {
 function KnowledgeAnswer({
   faq,
   waBase,
+  lang,
+  setLang,
   onBack,
 }: {
   faq: Faq;
   waBase: string | null;
+  lang: "en" | "bn";
+  setLang: (l: "en" | "bn") => void;
   onBack: () => void;
 }) {
   const [vote, setVote] = useState<"up" | "down" | null>(() => {
@@ -1111,6 +1135,9 @@ function KnowledgeAnswer({
     }
   });
 
+  const bn = FAQ_BN[faq.id];
+  const bnMode = lang === "bn" && !!bn;
+
   function cast(v: "up" | "down") {
     try {
       localStorage.setItem(`faq-vote-${faq.id}`, v);
@@ -1118,26 +1145,45 @@ function KnowledgeAnswer({
       /* private mode — still show the choice */
     }
     setVote(v);
-    toast.success(v === "up" ? "Glad it helped" : "Thanks — we'll improve this answer");
+    toast.success(
+      bnMode
+        ? v === "up"
+          ? FAQ_BN_LABELS.upToast
+          : FAQ_BN_LABELS.downToast
+        : v === "up"
+          ? "Glad it helped"
+          : "Thanks — we'll improve this answer"
+    );
   }
 
-  const sections: [string, string][] = [
-    ["What to do", faq.do],
-    ["What to avoid", faq.avoid],
-    ["When to be concerned", faq.concern],
-  ];
+  const sections: [string, string][] = bnMode
+    ? [
+        [FAQ_BN_LABELS.do, bn.do],
+        [FAQ_BN_LABELS.avoid, bn.avoid],
+        [FAQ_BN_LABELS.concern, bn.concern],
+      ]
+    : [
+        ["What to do", faq.do],
+        ["What to avoid", faq.avoid],
+        ["When to be concerned", faq.concern],
+      ];
 
   return (
     <section className="mt-8 space-y-4">
-      <button type="button" onClick={onBack} className="ink-label underline underline-offset-4">
-        ← All questions
-      </button>
+      <div className="flex items-center justify-between gap-3">
+        <button type="button" onClick={onBack} className="ink-label underline underline-offset-4">
+          {bnMode ? FAQ_BN_LABELS.allQuestions : "← All questions"}
+        </button>
+        <LangToggle lang={lang} setLang={setLang} />
+      </div>
 
       <div className="ink-card space-y-5 p-5">
         <div>
-          <p className="ink-label">Short answer</p>
-          <h3 className="mt-2 text-2xl leading-tight text-foreground">{faq.question}</h3>
-          <p className="mt-3 text-sm leading-relaxed text-foreground">{faq.short}</p>
+          <p className="ink-label">{bnMode ? FAQ_BN_LABELS.shortAnswer : "Short answer"}</p>
+          <h3 className="mt-2 text-2xl leading-tight text-foreground">
+            {bnMode ? bn.question : faq.question}
+          </h3>
+          <p className="mt-3 text-sm leading-relaxed text-foreground">{bnMode ? bn.short : faq.short}</p>
         </div>
 
         {sections.map(([label, body]) => (
@@ -1154,16 +1200,16 @@ function KnowledgeAnswer({
             rel="noreferrer"
             className="flex w-full items-center justify-center rounded-md bg-foreground px-4 py-3 text-sm font-medium text-background transition-opacity hover:opacity-90"
           >
-            Talk to InkPark on WhatsApp
+            {bnMode ? FAQ_BN_LABELS.whatsapp : "Talk to InkPark on WhatsApp"}
           </a>
         ) : null}
 
         <div className="flex items-center justify-center gap-3 border-t border-border pt-4">
-          <p className="ink-label mr-1">Was this helpful?</p>
+          <p className="ink-label mr-1">{bnMode ? FAQ_BN_LABELS.helpful : "Was this helpful?"}</p>
           {(
             [
-              ["up", "👍", "Helpful"],
-              ["down", "👎", "Not helpful"],
+              ["up", "👍", bnMode ? FAQ_BN_LABELS.up : "Helpful"],
+              ["down", "👎", bnMode ? FAQ_BN_LABELS.down : "Not helpful"],
             ] as const
           ).map(([v, emoji, label]) => (
             <button
