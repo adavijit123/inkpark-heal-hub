@@ -162,7 +162,7 @@ function Portal() {
     : null;
 
   return (
-    <main className="mx-auto w-full max-w-md px-5 pb-32 pt-10">
+    <main className="mx-auto w-full max-w-md px-5 pb-44 pt-10">
       <div className="fixed inset-x-0 top-0 z-10 mx-auto flex w-full max-w-md items-center justify-between bg-background/90 px-5 py-4 backdrop-blur-sm">
         <button
           type="button"
@@ -293,9 +293,15 @@ function Portal() {
 
       {openSection === "knowledge" ? <KnowledgeSection wa={wa} /> : null}
 
-
-
-      
+      {settings?.booking_url ? (
+        <TouchUpBooking
+          token={token}
+          bookingUrl={settings.booking_url}
+          day={day}
+          qc={qc}
+          alreadyRequested={tattoo.rebooking_requested}
+        />
+      ) : null}
 
       <SupportBox token={token} wa={wa} />
 
@@ -1094,6 +1100,54 @@ function ReactionBar({
         Saved ✓
       </p>
     </div>
+  );
+}
+
+function TouchUpBooking({
+  token,
+  bookingUrl,
+  day,
+  qc,
+  alreadyRequested,
+}: {
+  token: string;
+  bookingUrl: string;
+  day: number;
+  qc: ReturnType<typeof useQueryClient>;
+  alreadyRequested: boolean;
+}) {
+  const mark = useServerFn(markPortalStep);
+  const [busy, setBusy] = useState(false);
+
+  async function book() {
+    if (alreadyRequested) {
+      window.open(bookingUrl, "_blank", "noopener");
+      return;
+    }
+    setBusy(true);
+    try {
+      await mark({ data: { token, action: "rebooking" } });
+      qc.invalidateQueries({ queryKey: ["portal", token] });
+      window.open(bookingUrl, "_blank", "noopener");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not open booking");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="mt-10">
+      <h2 className="text-2xl text-foreground">Ready for a touch-up?</h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        {day > 30
+          ? "Healing is complete — book your touch-up session in one tap."
+          : "Book your touch-up or next session directly with InkPark."}
+      </p>
+      <Button className="mt-4 w-full" onClick={book} disabled={busy}>
+        {alreadyRequested ? "Open booking page ↗" : "Book a touch-up"}
+      </Button>
+    </section>
   );
 }
 
