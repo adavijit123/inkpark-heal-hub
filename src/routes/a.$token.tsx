@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState, type CSSProperties } from "react";
+import { Download, X, ZoomIn, ZoomOut } from "lucide-react";
 import {
   addHealingPhoto,
   getPortal,
@@ -288,7 +289,7 @@ function Portal() {
         </section>
       ) : null}
 
-      {openSection === "tracker" ? <PhotoTracker token={token} photos={photos} qc={qc} day={day} /> : null}
+      {openSection === "tracker" ? <PhotoTracker token={token} photos={photos} qc={qc} day={day} clientName={client.full_name} /> : null}
 
       {openSection === "knowledge" ? <KnowledgeSection wa={wa} /> : null}
 
@@ -546,11 +547,13 @@ function PhotoTracker({
   photos,
   qc,
   day,
+  clientName,
 }: {
   token: string;
   photos: TrackerPhoto[];
   qc: ReturnType<typeof useQueryClient>;
   day: number;
+  clientName: string;
 }) {
   const startUpload = useServerFn(startPortalUpload);
   const save = useServerFn(addHealingPhoto);
@@ -703,11 +706,7 @@ function PhotoTracker({
                     <li key={p.id} className="space-y-3">
                       <div className="flex gap-3">
                         {p.url ? (
-                          <img
-                            src={p.url}
-                            alt={`Your healing photo from day ${marker}`}
-                            className="h-24 w-24 shrink-0 rounded-md object-cover"
-                          />
+                          <PhotoPreview url={p.url} day={marker} clientName={clientName} />
                         ) : null}
                         <div className="min-w-0 flex-1">
                           {p.flagged ? (
@@ -862,6 +861,106 @@ function PhotoTracker({
         })}
       </div>
     </section>
+  );
+}
+
+function PhotoPreview({ url, day, clientName }: { url: string; day: number; clientName: string }) {
+  const [open, setOpen] = useState(false);
+  const [zoom, setZoom] = useState(1);
+
+  function download() {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `inkpark-day-${day}-healing-photo.jpg`;
+    a.target = "_blank";
+    a.rel = "noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        aria-label={`Preview healing photo from day ${day}`}
+        className="relative h-24 w-24 shrink-0 cursor-zoom-in overflow-hidden rounded-md"
+        onClick={() => {
+          setZoom(1);
+          setOpen(true);
+        }}
+      >
+        <img
+          src={url}
+          alt={`Your healing photo from day ${day}`}
+          className="h-24 w-24 rounded-md object-cover"
+        />
+        <span className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors hover:bg-black/30">
+          <ZoomIn className="h-5 w-5 text-white opacity-0 transition-opacity hover:opacity-100" />
+        </span>
+      </button>
+
+      {open ? (
+        <div
+          className="fixed inset-0 z-50 flex flex-col bg-black/95"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Photo preview day ${day}`}
+          onClick={() => setOpen(false)}
+        >
+          <div className="flex items-center justify-between gap-2 p-4" onClick={(e) => e.stopPropagation()}>
+            <p className="text-xs font-semibold tracking-[0.18em] text-white/80 uppercase">
+              {clientName} · Day {day}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                aria-label="Zoom out"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 text-white transition-colors hover:bg-white/10 disabled:opacity-40"
+                disabled={zoom <= 1}
+                onClick={() => setZoom((z) => Math.max(1, +(z - 0.5).toFixed(1)))}
+              >
+                <ZoomOut className="h-5 w-5" />
+              </button>
+              <span className="w-12 text-center text-xs font-semibold text-white/80">{Math.round(zoom * 100)}%</span>
+              <button
+                type="button"
+                aria-label="Zoom in"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 text-white transition-colors hover:bg-white/10 disabled:opacity-40"
+                disabled={zoom >= 4}
+                onClick={() => setZoom((z) => Math.min(4, +(z + 0.5).toFixed(1)))}
+              >
+                <ZoomIn className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                aria-label="Download photo"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 text-white transition-colors hover:bg-white/10"
+                onClick={download}
+              >
+                <Download className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                aria-label="Close preview"
+                className="ml-2 flex h-10 w-10 items-center justify-center rounded-full bg-white text-black transition-colors hover:bg-white/80"
+                onClick={() => setOpen(false)}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+          <div className="flex flex-1 items-center justify-center overflow-auto p-4" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={url}
+              alt={`Healing photo day ${day} for ${clientName}`}
+              className="max-h-full max-w-full rounded-md object-contain transition-transform duration-200"
+              style={{ transform: `scale(${zoom})` }}
+            />
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
 
