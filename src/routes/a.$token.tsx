@@ -706,7 +706,7 @@ function PhotoTracker({
                     <li key={p.id} className="space-y-3">
                       <div className="flex gap-3">
                         {p.url ? (
-                          <PhotoPreview url={p.url} day={marker} clientName={client.full_name} />
+                          <PhotoPreview url={p.url} day={marker} clientName={clientName} />
                         ) : null}
                         <div className="min-w-0 flex-1">
                           {p.flagged ? (
