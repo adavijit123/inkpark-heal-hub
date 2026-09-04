@@ -66,7 +66,7 @@ function ReplyPage() {
       const { data, error } = await supabase
         .from("healing_photos")
         .select(
-          "id, day_marker, created_at, note, concern, flagged, ai_feedback, ai_feedback_at, artist_feedback, artist_feedback_at, client_reaction, storage_path, tattoos(clients(full_name))",
+          "id, day_marker, created_at, note, concern, flagged, ai_feedback, ai_feedback_at, artist_feedback, artist_feedback_at, client_reaction, storage_path, tattoos(access_token, clients(full_name, phone))",
         )
         .order("created_at", { ascending: false });
       if (error) throw error;
