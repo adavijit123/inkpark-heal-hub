@@ -704,11 +704,7 @@ function PhotoTracker({
                     <li key={p.id} className="space-y-3">
                       <div className="flex gap-3">
                         {p.url ? (
-                          <img
-                            src={p.url}
-                            alt={`Your healing photo from day ${marker}`}
-                            className="h-24 w-24 shrink-0 rounded-md object-cover"
-                          />
+                          <PhotoPreview url={p.url} day={marker} clientName={client.full_name} />
                         ) : null}
                         <div className="min-w-0 flex-1">
                           {p.flagged ? (
