@@ -75,11 +75,16 @@ function ReplyPage() {
           const { data: s } = await supabase.storage
             .from("healing-photos")
             .createSignedUrl(p.storage_path, 3600);
-          const t = p.tattoos as { clients: { full_name: string } | null } | null;
+          const t = p.tattoos as {
+            access_token: string | null;
+            clients: { full_name: string; phone: string | null } | null;
+          } | null;
           return {
             ...p,
             url: s?.signedUrl ?? null,
             clientName: t?.clients?.full_name ?? "Client",
+            clientPhone: t?.clients?.phone ?? null,
+            accessToken: t?.access_token ?? null,
           } as Row;
         }),
       );
