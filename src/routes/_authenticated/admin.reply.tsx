@@ -159,6 +159,8 @@ function PhotoReply({ row, onSaved }: { row: Row; onSaved: () => void }) {
     if (error) toast.error(error.message);
     else {
       toast.success(kind === "ai" ? "AI healing check saved" : "Artist feedback sent to the client page");
+      const text = kind === "ai" ? ai : artist;
+      if (notify && text.trim()) notifyClient(kind, text);
       onSaved();
     }
   }
