@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { X, ZoomIn, ZoomOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
 import { Button } from "@/components/ui/button";
@@ -121,6 +122,8 @@ function PhotoReply({ row, onSaved }: { row: Row; onSaved: () => void }) {
   const [ai, setAi] = useState(row.ai_feedback ?? "");
   const [artist, setArtist] = useState(row.artist_feedback ?? "");
   const [saving, setSaving] = useState<"ai" | "artist" | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [zoom, setZoom] = useState(1);
 
   async function save(kind: "ai" | "artist") {
     setSaving(kind);
@@ -142,11 +145,24 @@ function PhotoReply({ row, onSaved }: { row: Row; onSaved: () => void }) {
     <section className="ink-card space-y-4 p-5">
       <div className="flex gap-3">
         {row.url ? (
-          <img
-            src={row.url}
-            alt={`Healing photo day ${row.day_marker} for ${row.clientName}`}
-            className="h-24 w-24 shrink-0 rounded-md object-cover"
-          />
+          <button
+            type="button"
+            aria-label={`Preview healing photo day ${row.day_marker} for ${row.clientName}`}
+            className="relative h-24 w-24 shrink-0 cursor-zoom-in overflow-hidden rounded-md"
+            onClick={() => {
+              setZoom(1);
+              setPreviewOpen(true);
+            }}
+          >
+            <img
+              src={row.url}
+              alt={`Healing photo day ${row.day_marker} for ${row.clientName}`}
+              className="h-24 w-24 rounded-md object-cover"
+            />
+            <span className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors hover:bg-black/30">
+              <ZoomIn className="h-5 w-5 text-white opacity-0 transition-opacity hover:opacity-100" />
+            </span>
+          </button>
         ) : null}
         <div className="min-w-0">
           <p className="truncate text-base text-foreground">{row.clientName}</p>
@@ -204,6 +220,59 @@ function PhotoReply({ row, onSaved }: { row: Row; onSaved: () => void }) {
           {saving === "artist" ? "Saving…" : "Save artist feedback"}
         </Button>
       </div>
+
+      {previewOpen && row.url ? (
+        <div
+          className="fixed inset-0 z-50 flex flex-col bg-black/90"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Photo preview day ${row.day_marker}`}
+          onClick={() => setPreviewOpen(false)}
+        >
+          <div className="flex items-center justify-between gap-2 p-4" onClick={(e) => e.stopPropagation()}>
+            <p className="text-xs font-semibold tracking-[0.18em] text-white/80 uppercase">
+              {row.clientName} · Day {row.day_marker}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                aria-label="Zoom out"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 text-white transition-colors hover:bg-white/10 disabled:opacity-40"
+                disabled={zoom <= 1}
+                onClick={() => setZoom((z) => Math.max(1, +(z - 0.5).toFixed(1)))}
+              >
+                <ZoomOut className="h-5 w-5" />
+              </button>
+              <span className="w-12 text-center text-xs font-semibold text-white/80">{Math.round(zoom * 100)}%</span>
+              <button
+                type="button"
+                aria-label="Zoom in"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 text-white transition-colors hover:bg-white/10 disabled:opacity-40"
+                disabled={zoom >= 4}
+                onClick={() => setZoom((z) => Math.min(4, +(z + 0.5).toFixed(1)))}
+              >
+                <ZoomIn className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                aria-label="Close preview"
+                className="ml-2 flex h-10 w-10 items-center justify-center rounded-full bg-white text-black transition-colors hover:bg-white/80"
+                onClick={() => setPreviewOpen(false)}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+          <div className="flex flex-1 items-center justify-center overflow-auto p-4" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={row.url}
+              alt={`Healing photo day ${row.day_marker} for ${row.clientName}`}
+              className="max-h-full max-w-full rounded-md object-contain transition-transform duration-200"
+              style={{ transform: `scale(${zoom})` }}
+            />
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
