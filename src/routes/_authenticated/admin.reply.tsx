@@ -220,6 +220,59 @@ function PhotoReply({ row, onSaved }: { row: Row; onSaved: () => void }) {
           {saving === "artist" ? "Saving…" : "Save artist feedback"}
         </Button>
       </div>
+
+      {previewOpen && row.url ? (
+        <div
+          className="fixed inset-0 z-50 flex flex-col bg-black/90"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Photo preview day ${row.day_marker}`}
+          onClick={() => setPreviewOpen(false)}
+        >
+          <div className="flex items-center justify-between gap-2 p-4" onClick={(e) => e.stopPropagation()}>
+            <p className="text-xs font-semibold tracking-[0.18em] text-white/80 uppercase">
+              {row.clientName} · Day {row.day_marker}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                aria-label="Zoom out"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 text-white transition-colors hover:bg-white/10 disabled:opacity-40"
+                disabled={zoom <= 1}
+                onClick={() => setZoom((z) => Math.max(1, +(z - 0.5).toFixed(1)))}
+              >
+                <ZoomOut className="h-5 w-5" />
+              </button>
+              <span className="w-12 text-center text-xs font-semibold text-white/80">{Math.round(zoom * 100)}%</span>
+              <button
+                type="button"
+                aria-label="Zoom in"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/25 text-white transition-colors hover:bg-white/10 disabled:opacity-40"
+                disabled={zoom >= 4}
+                onClick={() => setZoom((z) => Math.min(4, +(z + 0.5).toFixed(1)))}
+              >
+                <ZoomIn className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                aria-label="Close preview"
+                className="ml-2 flex h-10 w-10 items-center justify-center rounded-full bg-white text-black transition-colors hover:bg-white/80"
+                onClick={() => setPreviewOpen(false)}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+          <div className="flex flex-1 items-center justify-center overflow-auto p-4" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={row.url}
+              alt={`Healing photo day ${row.day_marker} for ${row.clientName}`}
+              className="max-h-full max-w-full rounded-md object-contain transition-transform duration-200"
+              style={{ transform: `scale(${zoom})` }}
+            />
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
