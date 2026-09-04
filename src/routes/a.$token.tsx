@@ -289,7 +289,7 @@ function Portal() {
         </section>
       ) : null}
 
-      {openSection === "tracker" ? <PhotoTracker token={token} photos={photos} qc={qc} day={day} /> : null}
+      {openSection === "tracker" ? <PhotoTracker token={token} photos={photos} qc={qc} day={day} clientName={client.full_name} /> : null}
 
       {openSection === "knowledge" ? <KnowledgeSection wa={wa} /> : null}
 
