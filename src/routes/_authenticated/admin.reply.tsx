@@ -122,32 +122,31 @@ function PhotoReply({ row, onSaved }: { row: Row; onSaved: () => void }) {
   const [ai, setAi] = useState(row.ai_feedback ?? "");
   const [artist, setArtist] = useState(row.artist_feedback ?? "");
   const [saving, setSaving] = useState<"ai" | "artist" | null>(null);
-
-  async function save(kind: "ai" | "artist") {
-    setSaving(kind);
-    const now = new Date().toISOString();
-    const patch =
-      kind === "ai"
-        ? { ai_feedback: ai.trim() || null, ai_feedback_at: ai.trim() ? now : null, ai_status: ai.trim() ? "done" : "pending" }
-        : { artist_feedback: artist.trim() || null, artist_feedback_at: artist.trim() ? now : null };
-    const { error } = await supabase.from("healing_photos").update(patch).eq("id", row.id);
-    setSaving(null);
-    if (error) toast.error(error.message);
-    else {
-      toast.success(kind === "ai" ? "AI healing check saved" : "Artist feedback sent to the client page");
-      onSaved();
-    }
-  }
-
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [zoom, setZoom] = useState(1);
+...
   return (
     <section className="ink-card space-y-4 p-5">
       <div className="flex gap-3">
         {row.url ? (
-          <img
-            src={row.url}
-            alt={`Healing photo day ${row.day_marker} for ${row.clientName}`}
-            className="h-24 w-24 shrink-0 rounded-md object-cover"
-          />
+          <button
+            type="button"
+            aria-label={`Preview healing photo day ${row.day_marker} for ${row.clientName}`}
+            className="relative h-24 w-24 shrink-0 cursor-zoom-in overflow-hidden rounded-md"
+            onClick={() => {
+              setZoom(1);
+              setPreviewOpen(true);
+            }}
+          >
+            <img
+              src={row.url}
+              alt={`Healing photo day ${row.day_marker} for ${row.clientName}`}
+              className="h-24 w-24 rounded-md object-cover"
+            />
+            <span className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors hover:bg-black/30">
+              <ZoomIn className="h-5 w-5 text-white opacity-0 transition-opacity hover:opacity-100" />
+            </span>
+          </button>
         ) : null}
         <div className="min-w-0">
           <p className="truncate text-base text-foreground">{row.clientName}</p>
