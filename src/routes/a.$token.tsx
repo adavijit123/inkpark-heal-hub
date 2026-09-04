@@ -1116,10 +1116,14 @@ function KnowledgeSection({ wa }: { wa: string | null }) {
 function KnowledgeAnswer({
   faq,
   waBase,
+  lang,
+  setLang,
   onBack,
 }: {
   faq: Faq;
   waBase: string | null;
+  lang: "en" | "bn";
+  setLang: (l: "en" | "bn") => void;
   onBack: () => void;
 }) {
   const [vote, setVote] = useState<"up" | "down" | null>(() => {
