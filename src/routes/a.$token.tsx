@@ -1183,14 +1183,64 @@ function PostHealing({
   );
 }
 
+type HubFaq = Faq & {
+  bn: { question: string; short: string; do: string; avoid: string; concern: string } | null;
+};
+
+const FALLBACK_HUB: HubFaq[] = FAQS.map((f) => ({ ...f, bn: FAQ_BN[f.id] ?? null }));
+
+function useHubFaqs(): HubFaq[] {
+  const { data } = useQuery({
+    queryKey: ["client-faqs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("aftercare_faqs")
+        .select("*")
+        .eq("active", true)
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  if (!data || data.length === 0) return FALLBACK_HUB;
+  return data.map((r) => ({
+    id: r.id,
+    question: r.question,
+    keywords: r.keywords ? r.keywords.split(",").map((k: string) => k.trim()).filter(Boolean) : [],
+    short: r.short,
+    do: r.do_text,
+    avoid: r.avoid_text,
+    concern: r.concern,
+    bn: r.question_bn
+      ? {
+          question: r.question_bn,
+          short: r.short_bn,
+          do: r.do_bn,
+          avoid: r.avoid_bn,
+          concern: r.concern_bn,
+        }
+      : null,
+  }));
+}
+
 function KnowledgeSection({ wa }: { wa: string | null }) {
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
   const [lang, setLang] = useState<"en" | "bn">("en");
   const waBase = wa ? (wa.split("?")[0] ?? null) : null;
+  const faqs = useHubFaqs();
 
-  const results = useMemo(() => searchFaqs(query), [query]);
-  const open = FAQS.find((f) => f.id === openId) ?? null;
+  const results = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return faqs;
+    const words = q.split(/\s+/).filter((w) => w.length > 1);
+    return faqs.filter((f) => {
+      const hay = `${f.question} ${f.keywords.join(" ")} ${f.short}`.toLowerCase();
+      return words.some((w) => hay.includes(w));
+    });
+  }, [query, faqs]);
+  const open = faqs.find((f) => f.id === openId) ?? null;
 
   if (open) {
     return <KnowledgeAnswer faq={open} waBase={waBase} lang={lang} setLang={setLang} onBack={() => setOpenId(null)} />;
