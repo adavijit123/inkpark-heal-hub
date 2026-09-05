@@ -23,7 +23,7 @@ import { UploadZone } from "@/components/UploadZone";
 import { toast } from "sonner";
 import { BN_LABELS, BN_STAGES } from "@/lib/aftercare-bn";
 import { FAQS, searchFaqs, type Faq } from "@/lib/aftercare-faq";
-import { FAQ_BN, FAQ_BN_LABELS } from "@/lib/aftercare-faq-bn";
+import { FAQ_BN } from "@/lib/aftercare-faq-bn";
 import { cn } from "@/lib/utils";
 import { CONCERN_OPTIONS } from "@/lib/portal-shared";
 
