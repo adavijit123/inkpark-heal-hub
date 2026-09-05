@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import QRCode from "qrcode";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
 import { UploadZone } from "@/components/UploadZone";
@@ -16,9 +15,9 @@ export const Route = createFileRoute("/_authenticated/admin/tattoo/$id")({
   head: () => ({
     meta: [
       { title: "Session Record — InkPark Aftercare" },
-      { name: "description", content: "Manage a tattoo session, its client link, healing photos and reminders." },
+      { name: "description", content: "Manage a tattoo session, healing photos and reminders." },
       { property: "og:title", content: "Session Record — InkPark Aftercare" },
-      { property: "og:description", content: "Manage a tattoo session, its client link, healing photos and reminders." },
+      { property: "og:description", content: "Manage a tattoo session, healing photos and reminders." },
     ],
   }),
   component: TattooDetail,
@@ -27,7 +26,6 @@ export const Route = createFileRoute("/_authenticated/admin/tattoo/$id")({
 function TattooDetail() {
   const { id } = Route.useParams();
   const qc = useQueryClient();
-  const [qr, setQr] = useState<string | null>(null);
 
   const tattoo = useQuery({
     queryKey: ["tattoo", id],
@@ -114,17 +112,6 @@ function TattooDetail() {
     },
   });
 
-  const link =
-    typeof window !== "undefined" && tattoo.data
-      ? `${window.location.origin}/a/${tattoo.data.access_token}`
-      : "";
-
-  useEffect(() => {
-    if (!link) return;
-    QRCode.toDataURL(link, { margin: 1, width: 480, color: { dark: "#111111", light: "#ffffff" } })
-      .then(setQr)
-      .catch(() => setQr(null));
-  }, [link]);
 
   async function uploadTattooPhoto(file: File) {
     const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
@@ -199,46 +186,6 @@ function TattooDetail() {
                 caption="Camera or gallery"
                 onFile={(f) => uploadTattooPhoto(f)}
               />
-            </div>
-          </section>
-
-          <section className="ink-card p-5">
-            <p className="ink-label">Client aftercare link</p>
-            {(() => {
-              const start = new Date(`${t.tattoo_date}T00:00:00Z`).getTime();
-              const now = new Date();
-              const days = Math.floor(
-                (Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) - start) / 86400000,
-              );
-              const expiresOn = new Date(start + 30 * 86400000).toISOString().slice(0, 10);
-              const expired = days > 30;
-              return (
-                <p className="mt-2 text-sm text-foreground">
-                  {expired
-                    ? `Deactivated — 30-day window ended ${expiresOn}. All records below are preserved.`
-                    : `Active — expires ${expiresOn} (${30 - days} day${30 - days === 1 ? "" : "s"} left).`}
-                </p>
-              );
-            })()}
-            {qr ? <img src={qr} alt="QR code for the client aftercare page" className="mt-3 w-40" /> : null}
-            <p className="mt-3 break-all text-xs text-muted-foreground">{link}</p>
-            <div className="mt-3 flex gap-2">
-              <Button
-                size="sm"
-                onClick={() => {
-                  navigator.clipboard.writeText(link);
-                  toast.success("Link copied");
-                }}
-              >
-                Copy link
-              </Button>
-              {qr ? (
-                <Button size="sm" variant="outline" asChild>
-                  <a href={qr} download={`inkpark-qr-${id.slice(0, 6)}.png`}>
-                    Download QR
-                  </a>
-                </Button>
-              ) : null}
             </div>
           </section>
 
