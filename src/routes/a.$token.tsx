@@ -22,7 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { UploadZone } from "@/components/UploadZone";
 import { toast } from "sonner";
 import { BN_LABELS, BN_STAGES } from "@/lib/aftercare-bn";
-import { FAQS, searchFaqs, type Faq } from "@/lib/aftercare-faq";
+import { FAQS, type Faq } from "@/lib/aftercare-faq";
 import { FAQ_BN } from "@/lib/aftercare-faq-bn";
 import { cn } from "@/lib/utils";
 import { CONCERN_OPTIONS } from "@/lib/portal-shared";
@@ -1290,7 +1290,7 @@ function KnowledgeSection({ wa }: { wa: string | null }) {
                 {String(i + 1).padStart(2, "0")}
               </span>
               <span className="flex-1 text-base text-foreground">
-                {lang === "bn" ? (FAQ_BN[f.id]?.question ?? f.question) : f.question}
+                {lang === "bn" ? (f.bn?.question ?? f.question) : f.question}
               </span>
               <span className="ink-label shrink-0">→</span>
             </button>
@@ -1308,7 +1308,7 @@ function KnowledgeAnswer({
   setLang,
   onBack,
 }: {
-  faq: Faq;
+  faq: HubFaq;
   waBase: string | null;
   lang: "en" | "bn";
   setLang: (l: "en" | "bn") => void;
@@ -1323,7 +1323,7 @@ function KnowledgeAnswer({
     }
   });
 
-  const bn = FAQ_BN[faq.id];
+  const bn = faq.bn;
   const useBn = lang === "bn" && !!bn;
 
   function cast(v: "up" | "down") {
