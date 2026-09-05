@@ -297,6 +297,7 @@ function Portal() {
         <TouchUpBooking
           token={token}
           bookingUrl={settings.booking_url}
+          qc={qc}
           alreadyRequested={tattoo.rebooking_requested}
         />
       ) : null}
