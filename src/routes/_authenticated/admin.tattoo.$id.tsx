@@ -15,9 +15,9 @@ export const Route = createFileRoute("/_authenticated/admin/tattoo/$id")({
   head: () => ({
     meta: [
       { title: "Session Record — InkPark Aftercare" },
-      { name: "description", content: "Manage a tattoo session, its client link, healing photos and reminders." },
+      { name: "description", content: "Manage a tattoo session, healing photos and reminders." },
       { property: "og:title", content: "Session Record — InkPark Aftercare" },
-      { property: "og:description", content: "Manage a tattoo session, its client link, healing photos and reminders." },
+      { property: "og:description", content: "Manage a tattoo session, healing photos and reminders." },
     ],
   }),
   component: TattooDetail,
