@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      aftercare_faqs: {
+        Row: {
+          active: boolean
+          avoid_bn: string
+          avoid_text: string
+          concern: string
+          concern_bn: string
+          created_at: string
+          do_bn: string
+          do_text: string
+          id: string
+          keywords: string
+          question: string
+          question_bn: string
+          short: string
+          short_bn: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          avoid_bn?: string
+          avoid_text?: string
+          concern?: string
+          concern_bn?: string
+          created_at?: string
+          do_bn?: string
+          do_text?: string
+          id?: string
+          keywords?: string
+          question: string
+          question_bn?: string
+          short?: string
+          short_bn?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          avoid_bn?: string
+          avoid_text?: string
+          concern?: string
+          concern_bn?: string
+          created_at?: string
+          do_bn?: string
+          do_text?: string
+          id?: string
+          keywords?: string
+          question?: string
+          question_bn?: string
+          short?: string
+          short_bn?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       aftercare_stages: {
         Row: {
           avoid: string | null

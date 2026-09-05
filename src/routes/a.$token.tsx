@@ -22,7 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { UploadZone } from "@/components/UploadZone";
 import { toast } from "sonner";
 import { BN_LABELS, BN_STAGES } from "@/lib/aftercare-bn";
-import { FAQS, searchFaqs, type Faq } from "@/lib/aftercare-faq";
+import { FAQS, type Faq } from "@/lib/aftercare-faq";
 import { FAQ_BN } from "@/lib/aftercare-faq-bn";
 import { cn } from "@/lib/utils";
 import { CONCERN_OPTIONS } from "@/lib/portal-shared";
@@ -1183,14 +1183,64 @@ function PostHealing({
   );
 }
 
+type HubFaq = Faq & {
+  bn: { question: string; short: string; do: string; avoid: string; concern: string } | null;
+};
+
+const FALLBACK_HUB: HubFaq[] = FAQS.map((f) => ({ ...f, bn: FAQ_BN[f.id] ?? null }));
+
+function useHubFaqs(): HubFaq[] {
+  const { data } = useQuery({
+    queryKey: ["client-faqs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("aftercare_faqs")
+        .select("*")
+        .eq("active", true)
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  if (!data || data.length === 0) return FALLBACK_HUB;
+  return data.map((r) => ({
+    id: r.id,
+    question: r.question,
+    keywords: r.keywords ? r.keywords.split(",").map((k: string) => k.trim()).filter(Boolean) : [],
+    short: r.short,
+    do: r.do_text,
+    avoid: r.avoid_text,
+    concern: r.concern,
+    bn: r.question_bn
+      ? {
+          question: r.question_bn,
+          short: r.short_bn,
+          do: r.do_bn,
+          avoid: r.avoid_bn,
+          concern: r.concern_bn,
+        }
+      : null,
+  }));
+}
+
 function KnowledgeSection({ wa }: { wa: string | null }) {
   const [query, setQuery] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
   const [lang, setLang] = useState<"en" | "bn">("en");
   const waBase = wa ? (wa.split("?")[0] ?? null) : null;
+  const faqs = useHubFaqs();
 
-  const results = useMemo(() => searchFaqs(query), [query]);
-  const open = FAQS.find((f) => f.id === openId) ?? null;
+  const results = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return faqs;
+    const words = q.split(/\s+/).filter((w) => w.length > 1);
+    return faqs.filter((f) => {
+      const hay = `${f.question} ${f.keywords.join(" ")} ${f.short}`.toLowerCase();
+      return words.some((w) => hay.includes(w));
+    });
+  }, [query, faqs]);
+  const open = faqs.find((f) => f.id === openId) ?? null;
 
   if (open) {
     return <KnowledgeAnswer faq={open} waBase={waBase} lang={lang} setLang={setLang} onBack={() => setOpenId(null)} />;
@@ -1240,7 +1290,7 @@ function KnowledgeSection({ wa }: { wa: string | null }) {
                 {String(i + 1).padStart(2, "0")}
               </span>
               <span className="flex-1 text-base text-foreground">
-                {lang === "bn" ? (FAQ_BN[f.id]?.question ?? f.question) : f.question}
+                {lang === "bn" ? (f.bn?.question ?? f.question) : f.question}
               </span>
               <span className="ink-label shrink-0">→</span>
             </button>
@@ -1258,7 +1308,7 @@ function KnowledgeAnswer({
   setLang,
   onBack,
 }: {
-  faq: Faq;
+  faq: HubFaq;
   waBase: string | null;
   lang: "en" | "bn";
   setLang: (l: "en" | "bn") => void;
@@ -1273,7 +1323,7 @@ function KnowledgeAnswer({
     }
   });
 
-  const bn = FAQ_BN[faq.id];
+  const bn = faq.bn;
   const useBn = lang === "bn" && !!bn;
 
   function cast(v: "up" | "down") {
