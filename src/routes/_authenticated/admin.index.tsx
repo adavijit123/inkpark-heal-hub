@@ -553,3 +553,22 @@ function Settings() {
     </div>
   );
 }
+
+/* ---------------- knowledge hub ---------------- */
+
+function KnowledgeHub() {
+  return (
+    <div className="space-y-4">
+      <Link
+        to="/admin/faq"
+        className="ink-card flex items-center justify-between p-4 hover:bg-accent"
+      >
+        <span className="text-base text-foreground">Open Knowledge Hub</span>
+        <span className="ink-label">Edit client questions &amp; answers →</span>
+      </Link>
+      <p className="text-xs leading-relaxed text-muted-foreground">
+        Manage the questions and answers clients see inside their Aftercare Knowledge Hub. Add English and Bangla versions, set the order, and hide entries anytime.
+      </p>
+    </div>
+  );
+}
