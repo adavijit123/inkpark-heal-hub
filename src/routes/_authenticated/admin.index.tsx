@@ -35,10 +35,17 @@ function AdminHome() {
     <AdminShell title="Dashboard">
       <Link
         to="/admin/reply"
-        className="ink-card mb-6 flex items-center justify-between p-4 hover:bg-accent"
+        className="ink-card mb-3 flex items-center justify-between p-4 hover:bg-accent"
       >
         <span className="text-base text-foreground">Photo replies</span>
         <span className="ink-label">Write AI check &amp; artist feedback →</span>
+      </Link>
+      <Link
+        to="/admin/faq"
+        className="ink-card mb-6 flex items-center justify-between p-4 hover:bg-accent"
+      >
+        <span className="text-base text-foreground">Knowledge Hub</span>
+        <span className="ink-label">Edit client questions &amp; answers →</span>
       </Link>
       <Tabs defaultValue="sessions">
 

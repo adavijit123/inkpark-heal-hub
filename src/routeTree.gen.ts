@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ATokenRouteImport } from './routes/a.$token'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedAdminFaqRouteImport } from './routes/_authenticated/admin.faq'
 import { Route as AuthenticatedAdminKnowledgeRouteImport } from './routes/_authenticated/admin.knowledge'
 import { Route as AuthenticatedAdminReplyRouteImport } from './routes/_authenticated/admin.reply'
 import { Route as AuthenticatedAdminTattooIdRouteImport } from './routes/_authenticated/admin.tattoo.$id'
@@ -42,6 +43,11 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminFaqRoute = AuthenticatedAdminFaqRouteImport.update({
+  id: '/admin/faq',
+  path: '/admin/faq',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminKnowledgeRoute =
   AuthenticatedAdminKnowledgeRouteImport.update({
     id: '/admin/knowledge',
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/a/$token': typeof ATokenRoute
+  '/admin/faq': typeof AuthenticatedAdminFaqRoute
   '/admin/knowledge': typeof AuthenticatedAdminKnowledgeRoute
   '/admin/reply': typeof AuthenticatedAdminReplyRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/a/$token': typeof ATokenRoute
+  '/admin/faq': typeof AuthenticatedAdminFaqRoute
   '/admin/knowledge': typeof AuthenticatedAdminKnowledgeRoute
   '/admin/reply': typeof AuthenticatedAdminReplyRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -84,6 +92,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/a/$token': typeof ATokenRoute
+  '/_authenticated/admin/faq': typeof AuthenticatedAdminFaqRoute
   '/_authenticated/admin/knowledge': typeof AuthenticatedAdminKnowledgeRoute
   '/_authenticated/admin/reply': typeof AuthenticatedAdminReplyRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -95,6 +104,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/a/$token'
+    | '/admin/faq'
     | '/admin/knowledge'
     | '/admin/reply'
     | '/admin/'
@@ -104,6 +114,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/a/$token'
+    | '/admin/faq'
     | '/admin/knowledge'
     | '/admin/reply'
     | '/admin'
@@ -114,6 +125,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/a/$token'
+    | '/_authenticated/admin/faq'
     | '/_authenticated/admin/knowledge'
     | '/_authenticated/admin/reply'
     | '/_authenticated/admin/'
@@ -164,6 +176,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/faq': {
+      id: '/_authenticated/admin/faq'
+      path: '/admin/faq'
+      fullPath: '/admin/faq'
+      preLoaderRoute: typeof AuthenticatedAdminFaqRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/knowledge': {
       id: '/_authenticated/admin/knowledge'
       path: '/admin/knowledge'
@@ -189,6 +208,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminFaqRoute: typeof AuthenticatedAdminFaqRoute
   AuthenticatedAdminKnowledgeRoute: typeof AuthenticatedAdminKnowledgeRoute
   AuthenticatedAdminReplyRoute: typeof AuthenticatedAdminReplyRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -196,6 +216,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminFaqRoute: AuthenticatedAdminFaqRoute,
   AuthenticatedAdminKnowledgeRoute: AuthenticatedAdminKnowledgeRoute,
   AuthenticatedAdminReplyRoute: AuthenticatedAdminReplyRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
