@@ -1,8 +1,9 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import logo from "@/assets/inkpark-logo.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -71,17 +72,20 @@ function Landing() {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-md flex-col px-6 py-14">
-      <p className="ink-label">InkPark Tattoo Studio</p>
-      <h1 className="mt-4 text-5xl leading-[0.95] text-foreground">
-        Tattoo
-        <br />
-        Aftercare
-        <br />
-        Portal
+      <img
+        src={logo}
+        alt="InkPark Tattoo Studio logo"
+        width={512}
+        height={512}
+        className="h-20 w-auto"
+      />
+      <p className="ink-label mt-4">InkPark Tattoo Studio</p>
+      <h1 className="mt-4 whitespace-nowrap text-4xl leading-none text-foreground">
+        Tattoo Aftercare Portal
       </h1>
       <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
-        Every InkPark client gets their own private aftercare page — opened with the QR code or link
-        we hand you after your session. No accounts, no apps.
+        Every InkPark client gets their own private aftercare page — opened with the
+        aftercare ID we hand you after your session. No accounts, no apps.
       </p>
 
       <div className="ink-card mt-10 divide-y divide-border">
@@ -113,19 +117,12 @@ function Landing() {
         })}
       </div>
 
-      <div className="mt-auto pt-12">
-        <Link
-          to="/auth"
-          className="ink-label inline-flex items-center gap-2 underline underline-offset-4 hover:text-foreground"
-        >
-          Studio staff login
-        </Link>
-      </div>
+      <div className="mt-auto pt-12" />
 
       <section className="ink-card mt-8 space-y-3 p-5">
-        <h2 className="text-lg leading-none text-foreground">Client aftercare link</h2>
+        <h2 className="text-lg leading-none text-foreground">Client aftercare ID</h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Paste the aftercare link or code your artist gave you.
+          Enter the aftercare ID from your invoice — your artist gave it to you after your session.
         </p>
         <Input
           value={code}
@@ -133,8 +130,8 @@ function Landing() {
           onKeyDown={(e) => {
             if (e.key === "Enter") openPortal();
           }}
-          placeholder="inkpark.app/a/…"
-          aria-label="Aftercare link or code"
+          placeholder="Your aftercare ID (invoice number)"
+          aria-label="Aftercare ID"
         />
         <Button className="w-full" onClick={openPortal}>
           Open my aftercare page
