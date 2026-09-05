@@ -1,8 +1,9 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import logo from "@/assets/inkpark-logo.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -119,9 +120,9 @@ function Landing() {
       <div className="mt-auto pt-12" />
 
       <section className="ink-card mt-8 space-y-3 p-5">
-        <h2 className="text-lg leading-none text-foreground">Client aftercare link</h2>
+        <h2 className="text-lg leading-none text-foreground">Client aftercare ID</h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Paste the aftercare link or code your artist gave you.
+          Enter the aftercare ID from your invoice — your artist gave it to you after your session.
         </p>
         <Input
           value={code}
@@ -129,8 +130,8 @@ function Landing() {
           onKeyDown={(e) => {
             if (e.key === "Enter") openPortal();
           }}
-          placeholder="inkpark.app/a/…"
-          aria-label="Aftercare link or code"
+          placeholder="Your aftercare ID (invoice number)"
+          aria-label="Aftercare ID"
         />
         <Button className="w-full" onClick={openPortal}>
           Open my aftercare page
