@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import QRCode from "qrcode";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminShell } from "@/components/AdminShell";
 import { UploadZone } from "@/components/UploadZone";
@@ -27,7 +26,6 @@ export const Route = createFileRoute("/_authenticated/admin/tattoo/$id")({
 function TattooDetail() {
   const { id } = Route.useParams();
   const qc = useQueryClient();
-  const [qr, setQr] = useState<string | null>(null);
 
   const tattoo = useQuery({
     queryKey: ["tattoo", id],
