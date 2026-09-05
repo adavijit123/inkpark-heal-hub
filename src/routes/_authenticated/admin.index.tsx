@@ -35,25 +35,19 @@ function AdminHome() {
     <AdminShell title="Dashboard">
       <Link
         to="/admin/reply"
-        className="ink-card mb-3 flex items-center justify-between p-4 hover:bg-accent"
+        className="ink-card mb-6 flex items-center justify-between p-4 hover:bg-accent"
       >
         <span className="text-base text-foreground">Photo replies</span>
         <span className="ink-label">Write AI check &amp; artist feedback →</span>
       </Link>
-      <Link
-        to="/admin/faq"
-        className="ink-card mb-6 flex items-center justify-between p-4 hover:bg-accent"
-      >
-        <span className="text-base text-foreground">Knowledge Hub</span>
-        <span className="ink-label">Edit client questions &amp; answers →</span>
-      </Link>
       <Tabs defaultValue="sessions">
 
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="sessions">Ink</TabsTrigger>
           <TabsTrigger value="clients">People</TabsTrigger>
           <TabsTrigger value="artists">Artists</TabsTrigger>
           <TabsTrigger value="care">Care</TabsTrigger>
+          <TabsTrigger value="knowledge">Knowledge</TabsTrigger>
           <TabsTrigger value="settings">Setup</TabsTrigger>
         </TabsList>
         <TabsContent value="sessions" className="mt-6">
@@ -67,6 +61,9 @@ function AdminHome() {
         </TabsContent>
         <TabsContent value="care" className="mt-6">
           <CareEditor />
+        </TabsContent>
+        <TabsContent value="knowledge" className="mt-6">
+          <KnowledgeHub />
         </TabsContent>
         <TabsContent value="settings" className="mt-6">
           <Settings />
@@ -553,6 +550,25 @@ function Settings() {
           />
         </div>
       ))}
+    </div>
+  );
+}
+
+/* ---------------- knowledge hub ---------------- */
+
+function KnowledgeHub() {
+  return (
+    <div className="space-y-4">
+      <Link
+        to="/admin/faq"
+        className="ink-card flex items-center justify-between p-4 hover:bg-accent"
+      >
+        <span className="text-base text-foreground">Open Knowledge Hub</span>
+        <span className="ink-label">Edit client questions &amp; answers →</span>
+      </Link>
+      <p className="text-xs leading-relaxed text-muted-foreground">
+        Manage the questions and answers clients see inside their Aftercare Knowledge Hub. Add English and Bangla versions, set the order, and hide entries anytime.
+      </p>
     </div>
   );
 }
