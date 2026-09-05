@@ -1104,13 +1104,11 @@ function ReactionBar({
 function TouchUpBooking({
   token,
   bookingUrl,
-  day,
   qc,
   alreadyRequested,
 }: {
   token: string;
   bookingUrl: string;
-  day: number;
   qc: ReturnType<typeof useQueryClient>;
   alreadyRequested: boolean;
 }) {
@@ -1138,9 +1136,7 @@ function TouchUpBooking({
     <section className="mt-10">
       <h2 className="text-2xl text-foreground">Ready for a touch-up?</h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        {day > 30
-          ? "Healing is complete — book your touch-up session in one tap."
-          : "Book your touch-up or next session directly with InkPark."}
+        Healing is complete — book your touch-up session in one tap.
       </p>
       <Button className="mt-4 w-full" onClick={book} disabled={busy}>
         {alreadyRequested ? "Open booking page ↗" : "Book a touch-up"}
