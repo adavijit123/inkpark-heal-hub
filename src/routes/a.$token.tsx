@@ -1199,32 +1199,24 @@ function KnowledgeSection({ wa }: { wa: string | null }) {
   return (
     <section className="mt-8">
       <div>
-        <h2 className="text-2xl text-foreground">
-          {lang === "bn" ? FAQ_BN_LABELS.title : "Aftercare Knowledge Hub"}
-        </h2>
+        <h2 className="text-2xl text-foreground">Aftercare Knowledge Hub</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          {lang === "bn"
-            ? FAQ_BN_LABELS.subtitle
-            : "Straight answers to the questions every client asks while healing."}
+          Straight answers to the questions every client asks while healing.
         </p>
       </div>
 
       <Input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder={lang === "bn" ? FAQ_BN_LABELS.searchPlaceholder : "Search your aftercare question…"}
+        placeholder="Search your aftercare question…"
         aria-label="Search aftercare questions"
         className="mt-4 h-auto rounded-md border-border bg-transparent px-4 py-3 text-sm"
       />
       <div className="mt-2 flex items-center justify-between gap-2">
         <p className="ink-label">
           {query.trim()
-            ? lang === "bn"
-              ? FAQ_BN_LABELS.results(results.length)
-              : `${results.length} result${results.length === 1 ? "" : "s"}`
-            : lang === "bn"
-              ? FAQ_BN_LABELS.popular
-              : "Popular questions"}
+            ? `${results.length} result${results.length === 1 ? "" : "s"}`
+            : "Popular questions"}
         </p>
         <LangToggle lang={lang} setLang={setLang} />
       </div>
@@ -1233,9 +1225,7 @@ function KnowledgeSection({ wa }: { wa: string | null }) {
         {results.length === 0 ? (
           <div className="p-5">
             <p className="text-sm text-muted-foreground">
-              {lang === "bn"
-                ? FAQ_BN_LABELS.noMatch
-                : "No matching answer. Try words like “gym”, “water”, “sun”, “itchy” or “peeling” — or message the studio directly."}
+              No matching answer. Try words like “gym”, “water”, “sun”, “itchy” or “peeling” — or message the studio directly.
             </p>
           </div>
         ) : (
